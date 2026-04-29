@@ -73,10 +73,14 @@ export default function CartSummary({ total, gifts }: Props) {
         </p>
         <div className="space-y-1.5">
           {ALL_GIFTS_AT.map((g) => {
+            const liveGoldenQty = gifts.find((x) => x.id === 'golden-words')?.qty ?? 0
+            // For 金玉良言貼紙: only the row whose qty matches the live qty is checked.
+            // At total ≥ 3000, the ×1 row turns gray and ×2 row lights up.
             const earned =
-              g.milestone === 3000
-                ? earnedIds.has('golden-words') &&
-                  gifts.find((x) => x.id === 'golden-words')?.qty === 2
+              g.id === 'golden-words'
+                ? liveGoldenQty === 1
+                : g.milestone === 3000
+                ? liveGoldenQty === 2
                 : earnedIds.has(g.id)
             // Qty is pinned to the milestone definition, not the live gift entry.
             // (Avoids the 1500-row showing ×2 when total ≥ 3000.)

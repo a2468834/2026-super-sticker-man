@@ -28,7 +28,7 @@ export default function Cart({ lineItems, onUpdate, onRemove }: Props) {
               {item.categoryName}
             </p>
             <p className="truncate text-xs text-gray-500">
-              {item.isAddon ? '加價購附件' : item.variantName}
+              {item.variantName}
             </p>
             <p className="mt-0.5 text-xs text-gray-400">
               NT$ {item.unitPrice} × {item.qty} ={' '}
@@ -42,15 +42,15 @@ export default function Cart({ lineItems, onUpdate, onRemove }: Props) {
           <div className="flex shrink-0 items-center gap-1">
             <button
               onClick={() => onUpdate(item.categoryId, item.variantId, item.qty - 1)}
-              className="flex h-6 w-6 items-center justify-center rounded border border-gray-300 text-sm leading-none hover:bg-gray-100"
+              className="flex h-6 w-6 items-center justify-center rounded border border-gray-300 text-sm leading-none text-gray-700 hover:bg-gray-100"
               aria-label="減少數量"
             >
               −
             </button>
-            <span className="w-6 text-center text-sm font-medium">{item.qty}</span>
+            <span className="w-6 text-center text-sm font-medium text-gray-800">{item.qty}</span>
             <button
               onClick={() => onUpdate(item.categoryId, item.variantId, item.qty + 1)}
-              className="flex h-6 w-6 items-center justify-center rounded border border-gray-300 text-sm leading-none hover:bg-gray-100"
+              className="flex h-6 w-6 items-center justify-center rounded border border-gray-300 text-sm leading-none text-gray-700 hover:bg-gray-100"
               aria-label="增加數量"
             >
               +

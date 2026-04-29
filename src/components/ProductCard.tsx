@@ -1,9 +1,12 @@
 'use client'
 
+import Image from 'next/image'
+
 interface Props {
   categoryId: string
   variantId: string
   variantName: string
+  image?: string
   unitPrice: number
   normalPrice?: number
   cartQty: number
@@ -13,6 +16,7 @@ interface Props {
 
 export default function ProductCard({
   variantName,
+  image,
   unitPrice,
   normalPrice,
   cartQty,
@@ -23,9 +27,26 @@ export default function ProductCard({
 
   return (
     <div className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-      {/* Placeholder image */}
-      <div className="aspect-square w-full bg-gray-100 flex items-center justify-center">
-        <span className="text-xs text-gray-400">{variantName}</span>
+      {/* Product image */}
+      <div className="relative aspect-square w-full bg-gray-100">
+        {image ? (
+          <Image
+            src={image}
+            alt={variantName}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          />
+        ) : (
+          <a
+            href="https://www.instagram.com/donot_like_sunday/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-full w-full items-center justify-center"
+          >
+            <span className="text-xs text-gray-400">{variantName}</span>
+          </a>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 p-3">

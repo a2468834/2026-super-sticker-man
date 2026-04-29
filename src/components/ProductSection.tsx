@@ -69,6 +69,9 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
         {!bulkPricing && (
           <span className="text-xs text-gray-400">NT$ {effectivePrice} / 件</span>
         )}
+        {category.description && (
+          <span className="text-xs text-gray-400">（{category.description}）</span>
+        )}
       </div>
 
       {/* Variant grid */}
@@ -81,6 +84,7 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
               categoryId={category.id}
               variantId={variant.id}
               variantName={variant.name}
+              image={variant.image}
               unitPrice={effectivePrice}
               normalPrice={normalPriceForCard}
               cartQty={qty}
@@ -115,14 +119,14 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
             <div className="flex items-center gap-2">
               <button
                 onClick={() => onUpdate(category.id, category.addon!.id, addonQty - 1)}
-                className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm hover:bg-gray-100"
+                className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-100"
               >
                 −
               </button>
-              <span className="w-5 text-center text-sm font-semibold">{addonQty}</span>
+              <span className="w-5 text-center text-sm font-semibold text-gray-800">{addonQty}</span>
               <button
                 onClick={() => onUpdate(category.id, category.addon!.id, addonQty + 1)}
-                className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm hover:bg-gray-100"
+                className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-100"
               >
                 +
               </button>
