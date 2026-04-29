@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { CATEGORIES } from '@/data/products'
 import type { CartItem } from '@/data/products'
-import { calcCartTotal, buildLineItems, getEarnedGifts } from '@/lib/pricing'
+import { buildLineItems, getEarnedGifts } from '@/lib/pricing'
 import ProductSection from '@/components/ProductSection'
 import Cart from '@/components/Cart'
 import CartSummary from '@/components/CartSummary'
@@ -14,7 +14,7 @@ export default function Home() {
   const [isMember, setIsMember] = useState(false)
 
   const lineItems = useMemo(() => buildLineItems(cart), [cart])
-  const total = useMemo(() => calcCartTotal(cart), [cart])
+  const total = useMemo(() => lineItems.reduce((s, l) => s + l.subtotal, 0), [lineItems])
   const gifts = useMemo(
     () => getEarnedGifts(total, hasReservation, isMember),
     [total, hasReservation, isMember],
@@ -50,18 +50,18 @@ export default function Home() {
 
   function removeFromCart(categoryId: string, variantId: string) {
     setCart((prev) => {
-      const next = prev.filter(
+      let next = prev.filter(
         (i) => !(i.categoryId === categoryId && i.variantId === variantId),
       )
-      // Guard: if sticker-book variants reach 0, also strip addon
-      const cat = CATEGORIES.find((c) => c.id === 'sticker-book')
-      if (cat?.addon) {
-        const bookQty = next
-          .filter((i) => i.categoryId === 'sticker-book' && i.variantId !== cat.addon!.id)
+      // Strip addons for any category whose base variants have dropped to 0.
+      for (const cat of CATEGORIES) {
+        if (!cat.addon) continue
+        const baseQty = next
+          .filter((i) => i.categoryId === cat.id && i.variantId !== cat.addon!.id)
           .reduce((s, i) => s + i.qty, 0)
-        if (bookQty === 0) {
-          return next.filter(
-            (i) => !(i.categoryId === 'sticker-book' && i.variantId === cat.addon!.id),
+        if (baseQty === 0) {
+          next = next.filter(
+            (i) => !(i.categoryId === cat.id && i.variantId === cat.addon!.id),
           )
         }
       }

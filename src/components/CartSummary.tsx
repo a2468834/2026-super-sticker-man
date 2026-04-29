@@ -27,10 +27,11 @@ export default function CartSummary({ total, gifts }: Props) {
   const earnedIds = new Set(gifts.map((g) => g.id))
 
   // Progress bar: find next unmet milestone
-  const nextMilestone = GIFT_MILESTONES.find((m) => total < m)
+  const milestones = [...GIFT_MILESTONES]
+  const nextMilestone = milestones.find((m) => total < m)
   const prevMilestone = nextMilestone
-    ? GIFT_MILESTONES[GIFT_MILESTONES.indexOf(nextMilestone) - 1] ?? 0
-    : GIFT_MILESTONES[GIFT_MILESTONES.length - 1]
+    ? milestones[milestones.indexOf(nextMilestone) - 1] ?? 0
+    : milestones[milestones.length - 1]
   const progressPct =
     nextMilestone != null
       ? Math.min(((total - prevMilestone) / (nextMilestone - prevMilestone)) * 100, 100)
@@ -72,12 +73,18 @@ export default function CartSummary({ total, gifts }: Props) {
         </p>
         <div className="space-y-1.5">
           {ALL_GIFTS_AT.map((g) => {
-            const earned = g.milestone === 3000
-              ? (earnedIds.has('golden-words') && gifts.find((x) => x.id === 'golden-words')?.qty === 2)
-              : earnedIds.has(g.id)
-            const matchedGift = gifts.find((x) => x.id === g.id) ?? { id: g.id, name: g.name, qty: g.qty }
+            const earned =
+              g.milestone === 3000
+                ? earnedIds.has('golden-words') &&
+                  gifts.find((x) => x.id === 'golden-words')?.qty === 2
+                : earnedIds.has(g.id)
+            // Qty is pinned to the milestone definition, not the live gift entry.
+            // (Avoids the 1500-row showing ×2 when total ≥ 3000.)
+            // Note is still taken from the live gift so member-addon text appears.
+            const liveNote = gifts.find((x) => x.id === g.id)?.note
+            const displayGift = { id: g.id, name: g.name, qty: g.qty, note: liveNote }
             return (
-              <GiftBadge key={`${g.id}-${g.milestone}`} gift={matchedGift} earned={!!earned} />
+              <GiftBadge key={`${g.id}-${g.milestone}`} gift={displayGift} earned={!!earned} />
             )
           })}
         </div>

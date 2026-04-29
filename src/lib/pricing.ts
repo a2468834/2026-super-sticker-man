@@ -26,7 +26,20 @@ function isAddonItem(categoryId: string, variantId: string): boolean {
   return cat?.addon?.id === variantId
 }
 
-export function getUnitPrice(item: CartItem, allItems: CartItem[]): number {
+// Pre-compute total non-addon qty per bulk category in one pass — O(N).
+function computeBulkTotals(items: CartItem[]): Map<string, number> {
+  const totals = new Map<string, number>()
+  for (const item of items) {
+    const cat = CATEGORIES.find((c) => c.id === item.categoryId)
+    if (!cat || cat.pricing.type !== 'bulk') continue
+    if (isAddonItem(item.categoryId, item.variantId)) continue
+    totals.set(item.categoryId, (totals.get(item.categoryId) ?? 0) + item.qty)
+  }
+  return totals
+}
+
+// Private resolver that accepts pre-computed bulk totals to avoid O(N²).
+function resolveUnitPrice(item: CartItem, bulkTotals: Map<string, number>): number {
   const cat = CATEGORIES.find((c) => c.id === item.categoryId)
   if (!cat) return 0
 
@@ -38,27 +51,31 @@ export function getUnitPrice(item: CartItem, allItems: CartItem[]): number {
     return cat.pricing.price
   }
 
-  // bulk: count non-addon qty across all items in this category
-  const totalQty = allItems
-    .filter((i) => i.categoryId === item.categoryId && !isAddonItem(i.categoryId, i.variantId))
-    .reduce((s, i) => s + i.qty, 0)
-
+  const totalQty = bulkTotals.get(item.categoryId) ?? 0
   return totalQty >= cat.pricing.minQty ? cat.pricing.discountPrice : cat.pricing.normalPrice
 }
 
+// Public API: convenient single-item lookup (computes bulk totals internally).
+export function getUnitPrice(item: CartItem, allItems: CartItem[]): number {
+  return resolveUnitPrice(item, computeBulkTotals(allItems))
+}
+
 export function calcCartTotal(items: CartItem[]): number {
-  return items.reduce((sum, item) => sum + getUnitPrice(item, items) * item.qty, 0)
+  const bulkTotals = computeBulkTotals(items)
+  return items.reduce((sum, item) => sum + resolveUnitPrice(item, bulkTotals) * item.qty, 0)
 }
 
 export function buildLineItems(items: CartItem[]): LineItem[] {
-  return items.map((item) => {
-    const cat = CATEGORIES.find((c) => c.id === item.categoryId)!
+  const bulkTotals = computeBulkTotals(items)
+  return items.flatMap((item) => {
+    const cat = CATEGORIES.find((c) => c.id === item.categoryId)
+    if (!cat) return []
     const isAddon = isAddonItem(item.categoryId, item.variantId)
     const variantName = isAddon
-      ? cat.addon!.name
+      ? (cat.addon?.name ?? item.variantId)
       : (cat.variants.find((v) => v.id === item.variantId)?.name ?? item.variantId)
-    const unitPrice = getUnitPrice(item, items)
-    return {
+    const unitPrice = resolveUnitPrice(item, bulkTotals)
+    return [{
       categoryId: item.categoryId,
       variantId: item.variantId,
       categoryName: cat.name,
@@ -67,7 +84,7 @@ export function buildLineItems(items: CartItem[]): LineItem[] {
       qty: item.qty,
       subtotal: unitPrice * item.qty,
       isAddon,
-    }
+    }]
   })
 }
 
