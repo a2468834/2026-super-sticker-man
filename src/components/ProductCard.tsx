@@ -63,32 +63,15 @@ export default function ProductCard({
         </div>
 
         {/* Cart control */}
-        {cartQty === 0 ? (
-          <button
-            onClick={onAdd}
-            className="mt-1 w-full rounded-lg bg-gray-900 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 transition-colors"
-          >
-            加入購物車
-          </button>
-        ) : (
-          <div className="mt-1 flex items-center justify-between rounded-lg border border-gray-300 px-2 py-1">
-            <button
-              onClick={() => onUpdate(cartQty - 1)}
-              className="w-6 text-center text-base font-bold text-gray-600 hover:text-gray-900"
-              aria-label="減少數量"
-            >
-              −
-            </button>
-            <span className="text-sm font-semibold text-gray-800">{cartQty}</span>
-            <button
-              onClick={() => onUpdate(cartQty + 1)}
-              className="w-6 text-center text-base font-bold text-gray-600 hover:text-gray-900"
-              aria-label="增加數量"
-            >
-              +
-            </button>
-          </div>
+        {cartQty > 0 && (
+          <p className="text-center text-xs text-gray-400">已加入 {cartQty} 件</p>
         )}
+        <button
+          onClick={onAdd}
+          className="mt-1 w-full rounded-lg bg-gray-900 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 transition-colors"
+        >
+          加入購物車
+        </button>
       </div>
     </div>
   )
