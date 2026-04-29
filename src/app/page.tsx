@@ -13,12 +13,13 @@ export default function Home() {
   const [hasReservation, setHasReservation] = useState(false)
   const [isMember, setIsMember] = useState(false)
   const [isNmsStaff, setIsNmsStaff] = useState(false)
+  const [hasStamp, setHasStamp] = useState(false)
 
   const lineItems = useMemo(() => buildLineItems(cart), [cart])
   const total = useMemo(() => lineItems.reduce((s, l) => s + l.subtotal, 0), [lineItems])
   const gifts = useMemo(
-    () => getEarnedGifts(total, hasReservation, isMember, isNmsStaff),
-    [total, hasReservation, isMember, isNmsStaff],
+    () => getEarnedGifts(total, hasReservation, isMember, isNmsStaff, hasStamp),
+    [total, hasReservation, isMember, isNmsStaff, hasStamp],
   )
 
   function addToCart(categoryId: string, variantId: string) {
@@ -127,6 +128,15 @@ export default function Home() {
               className="h-4 w-4 rounded accent-gray-900"
             />
             <span>我是「NMS | 貼紙博物館」館員</span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={hasStamp}
+              onChange={(e) => setHasStamp(e.target.checked)}
+              className="h-4 w-4 rounded accent-gray-900"
+            />
+            <span>我記得「現場免費蓋鋼印」</span>
           </label>
         </div>
 

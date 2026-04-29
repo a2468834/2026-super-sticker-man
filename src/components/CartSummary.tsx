@@ -92,7 +92,9 @@ export default function CartSummary({ total, gifts }: Props) {
       </div>
 
       {/* Identity-based gifts */}
-      {(gifts.some((g) => g.id === 'light-stick') || gifts.some((g) => g.id === 'mystery-gift')) && (
+      {(['light-stick', 'mystery-gift', 'stamp'] as const).some((id) =>
+        gifts.some((g) => g.id === id),
+      ) && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
             活動贈品
@@ -103,6 +105,9 @@ export default function CartSummary({ total, gifts }: Props) {
             )}
             {gifts.some((g) => g.id === 'mystery-gift') && (
               <GiftBadge gift={{ id: 'mystery-gift', name: '神秘禮物' }} earned={true} />
+            )}
+            {gifts.some((g) => g.id === 'stamp') && (
+              <GiftBadge gift={{ id: 'stamp', name: '鋼印隨便蓋' }} earned={true} />
             )}
           </div>
         </div>

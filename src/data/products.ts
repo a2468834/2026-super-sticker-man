@@ -43,7 +43,7 @@ const v = (suffix: string, names: string[], images?: string[]): Variant[] => {
 export const CATEGORIES: Category[] = [
   {
     id: 'embroidery-patch',
-    name: '刺繡布貼',
+    name: '刺繡布貼（含背膠）',
     pricing: { type: 'fixed', price: 170 },
     variants: v(
       'embroidery',
@@ -89,21 +89,21 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'collab-house',
-    name: '聯名貼紙房子',
+    name: '愛貼 99 聯名貼紙包',
     pricing: { type: 'bulk', normalPrice: 230, discountPrice: 200, minQty: 4 },
     variants: v(
       'house',
-      ['款式 A', '款式 B', '款式 C', '款式 D', '款式 E', '款式 F', '款式 G', '款式 H', '款式 I'],
+      ['什物 a kind of café', '茄子先生', '寫情書的人', 'Emily Liu', 'OURS 森林好朋友', '小虎 day', '仰角 35 度', '包大山', 'S'],
       [
-        '/images/聯名貼紙房子-款式 A.jpg',
-        '/images/聯名貼紙房子-款式 B.jpg',
-        '/images/聯名貼紙房子-款式 C.jpg',
-        '/images/聯名貼紙房子-款式 D.jpg',
-        '/images/聯名貼紙房子-款式 E.jpg',
-        '/images/聯名貼紙房子-款式 F.jpg',
-        '/images/聯名貼紙房子-款式 G.jpg',
-        '/images/聯名貼紙房子-款式 H.jpg',
-        '/images/聯名貼紙房子-款式 I.jpg',
+        '/images/愛貼 99 聯名貼紙包-什物 a kind of café.jpg',
+        '/images/愛貼 99 聯名貼紙包-茄子先生.jpg',
+        '/images/愛貼 99 聯名貼紙包-寫情書的人.jpg',
+        '/images/愛貼 99 聯名貼紙包-Emily Liu.jpg',
+        '/images/愛貼 99 聯名貼紙包-OURS 森林好朋友.jpg',
+        '/images/愛貼 99 聯名貼紙包-小虎 day.jpg',
+        '/images/愛貼 99 聯名貼紙包-仰角 35 度.jpg',
+        '/images/愛貼 99 聯名貼紙包-包大山.jpg',
+        '/images/愛貼 99 聯名貼紙包-S.jpg',
       ],
     ),
   },
@@ -155,7 +155,7 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'fortune-slip',
-    name: '花朵運勢籤',
+    name: '花朵運勢籤（貼紙）',
     pricing: { type: 'bulk', normalPrice: 40, discountPrice: 30, minQty: 4 },
     variants: v('fortune', ['款式 A', '款式 B', '款式 C', '款式 D', '款式 E', '款式 F']),
   },
