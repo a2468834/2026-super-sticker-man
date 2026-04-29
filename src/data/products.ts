@@ -93,7 +93,7 @@ export const CATEGORIES: Category[] = [
     pricing: { type: 'bulk', normalPrice: 230, discountPrice: 200, minQty: 4 },
     variants: v(
       'house',
-      ['什物 a kind of café', '茄子先生', '寫情書的人', 'Emily Liu', 'OURS 森林好朋友', '小虎 day', '仰角 35 度', '包大山', 'S'],
+      ['什物 a kind of café', '茄子先生', '寫情書的人', 'Emily Liu', 'OURS 森林好朋友', '小虎 day', '仰角 35 度', '包大山', '（超厲害的）S'],
       [
         '/images/愛貼 99 聯名貼紙包-什物 a kind of café.jpg',
         '/images/愛貼 99 聯名貼紙包-茄子先生.jpg',
@@ -151,12 +151,23 @@ export const CATEGORIES: Category[] = [
     id: 'carbon-copy',
     name: '複寫本',
     pricing: { type: 'fixed', price: 200 },
-    variants: v('carbon', ['全一款']),
+    variants: v('carbon', ['全一款'], ['/images/複寫本.jpg']),
   },
   {
     id: 'fortune-slip',
     name: '花朵運勢籤（貼紙）',
     pricing: { type: 'bulk', normalPrice: 40, discountPrice: 30, minQty: 4 },
-    variants: v('fortune', ['款式 A', '款式 B', '款式 C', '款式 D', '款式 E', '款式 F']),
+    variants: v(
+      'fortune',
+      ['成果の花', '恋の花', '旅行の花', '元気の花', '幸運の花', '金運の花'],
+      [
+        '/images/花朵運勢籤-款式 A.jpg',
+        '/images/花朵運勢籤-款式 B.jpg',
+        '/images/花朵運勢籤-款式 C.jpg',
+        '/images/花朵運勢籤-款式 D.jpg',
+        '/images/花朵運勢籤-款式 E.jpg',
+        '/images/花朵運勢籤-款式 F.jpg',
+      ],
+    ),
   },
 ]
