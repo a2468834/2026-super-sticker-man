@@ -11,7 +11,6 @@ interface Props {
   normalPrice?: number
   cartQty: number
   onAdd: () => void
-  onUpdate: (qty: number) => void
 }
 
 export default function ProductCard({
@@ -21,7 +20,6 @@ export default function ProductCard({
   normalPrice,
   cartQty,
   onAdd,
-  onUpdate,
 }: Props) {
   const isDiscounted = normalPrice != null && unitPrice < normalPrice
 

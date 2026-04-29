@@ -57,7 +57,7 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
             NT$ {bulkPricing.normalPrice}
             {bulkTotalQty >= bulkPricing.minQty ? (
               <span className="ml-1 font-semibold text-red-600">
-                → NT$ {bulkPricing.discountPrice}（已達折扣）
+                → NT$ {bulkPricing.discountPrice}（多件享折扣）
               </span>
             ) : (
               <span className="ml-1 text-gray-400">
@@ -89,7 +89,6 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
               normalPrice={normalPriceForCard}
               cartQty={qty}
               onAdd={() => onAdd(category.id, variant.id)}
-              onUpdate={(q) => onUpdate(category.id, variant.id, q)}
             />
           )
         })}

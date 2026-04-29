@@ -18,7 +18,7 @@ export default function Home() {
   const lineItems = useMemo(() => buildLineItems(cart), [cart])
   const total = useMemo(() => lineItems.reduce((s, l) => s + l.subtotal, 0), [lineItems])
   const gifts = useMemo(
-    () => getEarnedGifts(total, hasReservation, isMember, isNmsStaff, hasStamp),
+    () => getEarnedGifts(total, { hasReservation, isMember, isNmsStaff, hasStamp }),
     [total, hasReservation, isMember, isNmsStaff, hasStamp],
   )
 

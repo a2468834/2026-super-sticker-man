@@ -91,27 +91,24 @@ export default function CartSummary({ total, gifts }: Props) {
         </div>
       </div>
 
-      {/* Identity-based gifts */}
-      {(['light-stick', 'mystery-gift', 'stamp'] as const).some((id) =>
-        gifts.some((g) => g.id === id),
-      ) && (
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-            活動贈品
-          </p>
-          <div className="space-y-1.5">
-            {gifts.some((g) => g.id === 'light-stick') && (
-              <GiftBadge gift={{ id: 'light-stick', name: '應援手燈' }} earned={true} />
-            )}
-            {gifts.some((g) => g.id === 'mystery-gift') && (
-              <GiftBadge gift={{ id: 'mystery-gift', name: '神秘禮物' }} earned={true} />
-            )}
-            {gifts.some((g) => g.id === 'stamp') && (
-              <GiftBadge gift={{ id: 'stamp', name: '鋼印隨便蓋' }} earned={true} />
-            )}
+      {/* Identity-based gifts — anything not tied to a spending milestone */}
+      {(() => {
+        const milestoneIds = new Set(ALL_GIFTS_AT.map((g) => g.id === 'golden-words-2' ? 'golden-words' : g.id))
+        const activityGifts = gifts.filter((g) => !milestoneIds.has(g.id))
+        if (activityGifts.length === 0) return null
+        return (
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              活動贈品
+            </p>
+            <div className="space-y-1.5">
+              {activityGifts.map((g) => (
+                <GiftBadge key={g.id} gift={g} earned={true} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

@@ -83,13 +83,15 @@ export function buildLineItems(items: CartItem[]): LineItem[] {
   })
 }
 
-export function getEarnedGifts(
-  total: number,
-  hasReservation: boolean,
-  isMember: boolean,
-  isNmsStaff: boolean,
-  hasStamp: boolean,
-): Gift[] {
+export type GiftFlags = {
+  hasReservation: boolean
+  isMember: boolean
+  isNmsStaff: boolean
+  hasStamp: boolean
+}
+
+export function getEarnedGifts(total: number, flags: GiftFlags): Gift[] {
+  const { hasReservation, isMember, isNmsStaff, hasStamp } = flags
   const gifts: Gift[] = []
 
   if (hasReservation) {
