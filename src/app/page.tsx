@@ -84,16 +84,14 @@ export default function Home() {
           </span>
         </div>
         <div className="border-t border-amber-100 bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-800">
-          僅用於活動前試算，實際金額、品項與優惠內容請見{' '}
           <a
             href="https://www.instagram.com/donot_like_sunday/"
             target="_blank"
             rel="noopener noreferrer"
             className="font-semibold underline hover:text-amber-900"
           >
-            IG
-          </a>{' '}
-          公告
+            此頁內容僅供參考，售價、品項、庫存與優惠內容以現場為準，或請見{' '}IG{' '}公告
+          </a>
         </div>
       </header>
 

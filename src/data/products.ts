@@ -29,12 +29,16 @@ export type CartItem = {
   qty: number
 }
 
-const v = (suffix: string, names: string[], images?: string[]): Variant[] =>
-  names.map((name, i) => ({
+const v = (suffix: string, names: string[], images?: string[]): Variant[] => {
+  if (images && images.length !== names.length) {
+    console.error(`products: v('${suffix}') images.length ${images.length} !== names.length ${names.length}`)
+  }
+  return names.map((name, i) => ({
     id: `${suffix}-${String.fromCharCode(97 + i)}`,
     name,
     image: images?.[i],
   }))
+}
 
 export const CATEGORIES: Category[] = [
   {
@@ -107,13 +111,13 @@ export const CATEGORIES: Category[] = [
     id: 'memo-set',
     name: 'MEMO 紙套組',
     pricing: { type: 'fixed', price: 200 },
-    variants: v('memo', ['款式 A'], ['/images/MEMO 紙套組.jpg']),
+    variants: v('memo', ['全一款'], ['/images/MEMO 紙套組.jpg']),
   },
   {
     id: 'die-cut-roll',
     name: '造型割型貼紙捲',
     pricing: { type: 'fixed', price: 360 },
-    variants: v('roll', ['款式 A'], ['/images/造型割型貼紙捲.jpg']),
+    variants: v('roll', ['全一款'], ['/images/造型割型貼紙捲.jpg']),
   },
   {
     id: 'magnet-badge',
@@ -129,25 +133,25 @@ export const CATEGORIES: Category[] = [
     id: 'sticker-stand',
     name: '可撕式貼紙架',
     pricing: { type: 'fixed', price: 260 },
-    variants: v('stand', ['款式 A'], ['/images/可撕式貼紙架.jpg']),
+    variants: v('stand', ['全一款'], ['/images/可撕式貼紙架.jpg']),
   },
   {
     id: 'direction-sticker',
     name: '奇的方向貼紙',
     pricing: { type: 'fixed', price: 100 },
-    variants: v('direction', ['款式 A'], ['/images/奇的方向貼紙.jpg']),
+    variants: v('direction', ['全一款'], ['/images/奇的方向貼紙.jpg']),
   },
   {
     id: 'hand-towel',
     name: '擦手巾',
     pricing: { type: 'fixed', price: 390 },
-    variants: v('towel', ['款式 A'], ['/images/擦手巾.jpg']),
+    variants: v('towel', ['全一款'], ['/images/擦手巾.jpg']),
   },
   {
     id: 'carbon-copy',
     name: '複寫本',
     pricing: { type: 'fixed', price: 200 },
-    variants: v('carbon', ['款式 A']),
+    variants: v('carbon', ['全一款']),
   },
   {
     id: 'fortune-slip',

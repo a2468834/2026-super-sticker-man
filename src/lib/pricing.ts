@@ -55,11 +55,6 @@ function resolveUnitPrice(item: CartItem, bulkTotals: Map<string, number>): numb
   return totalQty >= cat.pricing.minQty ? cat.pricing.discountPrice : cat.pricing.normalPrice
 }
 
-// Public API: convenient single-item lookup (computes bulk totals internally).
-export function getUnitPrice(item: CartItem, allItems: CartItem[]): number {
-  return resolveUnitPrice(item, computeBulkTotals(allItems))
-}
-
 export function calcCartTotal(items: CartItem[]): number {
   const bulkTotals = computeBulkTotals(items)
   return items.reduce((sum, item) => sum + resolveUnitPrice(item, bulkTotals) * item.qty, 0)

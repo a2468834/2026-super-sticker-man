@@ -13,14 +13,14 @@ const THRESHOLD_LABELS: Record<number, string> = {
   1500: '滿 1500｜金玉良言貼紙',
   2000: '滿 2000｜IDOL卡套',
   2500: '滿 2500｜白手帳套組',
-  3000: '滿 3000｜金玉良言貼紙 ×2',
+  3000: '滿 3000｜金玉良言貼紙二張',
 }
 
 const ALL_GIFTS_AT: { milestone: number; id: string; name: string; qty?: number }[] = [
   { milestone: 1500, id: 'golden-words', name: '金玉良言貼紙', qty: 1 },
   { milestone: 2000, id: 'idol-card', name: 'IDOL卡套' },
   { milestone: 2500, id: 'notebook-set', name: '白手帳套組' },
-  { milestone: 3000, id: 'golden-words-2', name: '金玉良言貼紙', qty: 2 },
+  { milestone: 3000, id: 'golden-words-2', name: '金玉良言貼紙二張', qty: 2 },
 ]
 
 export default function CartSummary({ total, gifts }: Props) {
@@ -72,25 +72,22 @@ export default function CartSummary({ total, gifts }: Props) {
           滿額贈品
         </p>
         <div className="space-y-1.5">
-          {ALL_GIFTS_AT.map((g) => {
+          {(() => {
             const liveGoldenQty = gifts.find((x) => x.id === 'golden-words')?.qty ?? 0
-            // For 金玉良言貼紙: only the row whose qty matches the live qty is checked.
-            // At total ≥ 3000, the ×1 row turns gray and ×2 row lights up.
-            const earned =
-              g.id === 'golden-words'
-                ? liveGoldenQty === 1
-                : g.milestone === 3000
-                ? liveGoldenQty === 2
+            return ALL_GIFTS_AT.map((g) => {
+              const isGoldenRow = g.id === 'golden-words' || g.id === 'golden-words-2'
+              const earned = isGoldenRow
+                ? liveGoldenQty === g.qty!
                 : earnedIds.has(g.id)
-            // Qty is pinned to the milestone definition, not the live gift entry.
-            // (Avoids the 1500-row showing ×2 when total ≥ 3000.)
-            // Note is still taken from the live gift so member-addon text appears.
-            const liveNote = gifts.find((x) => x.id === g.id)?.note
-            const displayGift = { id: g.id, name: g.name, qty: g.qty, note: liveNote }
-            return (
-              <GiftBadge key={`${g.id}-${g.milestone}`} gift={displayGift} earned={!!earned} />
-            )
-          })}
+              // Qty pinned to milestone definition; note looked up by canonical live id.
+              const liveId = g.id === 'golden-words-2' ? 'golden-words' : g.id
+              const liveNote = gifts.find((x) => x.id === liveId)?.note
+              const displayGift = { id: g.id, name: g.name, qty: g.id === 'golden-words-2' ? undefined : g.qty, note: liveNote }
+              return (
+                <GiftBadge key={`${g.id}-${g.milestone}`} gift={displayGift} earned={earned} />
+              )
+            })
+          })()}
         </div>
       </div>
 
