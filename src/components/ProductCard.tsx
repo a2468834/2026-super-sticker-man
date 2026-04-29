@@ -31,7 +31,7 @@ export default function ProductCard({
       <div className="relative aspect-square w-full bg-gray-100">
         {image ? (
           <Image
-            src={image}
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}${image}`}
             alt={variantName}
             fill
             className="object-cover"

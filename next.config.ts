@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   basePath: isProd ? '/2026-super-sticker-man' : '',
   assetPrefix: isProd ? '/2026-super-sticker-man/' : '',
   images: { unoptimized: true },
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isProd ? '/2026-super-sticker-man' : '',
+  },
 }
 
 export default nextConfig
