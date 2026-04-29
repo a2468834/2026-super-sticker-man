@@ -52,20 +52,22 @@ export default function ProductCard({
       <div className="flex flex-col gap-2 p-3">
         <p className="text-sm font-medium text-gray-800 truncate">{variantName}</p>
 
-        {/* Price */}
-        <div className="flex items-baseline gap-1.5">
-          <span className={`text-sm font-bold ${isDiscounted ? 'text-red-600' : 'text-gray-900'}`}>
-            NT$ {unitPrice}
-          </span>
-          {isDiscounted && (
-            <span className="text-xs text-gray-400 line-through">NT$ {normalPrice}</span>
+        {/* Price + in-cart indicator on the same line */}
+        <div className="flex items-baseline justify-between gap-1.5">
+          <div className="flex items-baseline gap-1.5">
+            <span className={`text-sm font-bold ${isDiscounted ? 'text-red-600' : 'text-gray-900'}`}>
+              NT$ {unitPrice}
+            </span>
+            {isDiscounted && (
+              <span className="text-xs text-gray-400 line-through">NT$ {normalPrice}</span>
+            )}
+          </div>
+          {cartQty > 0 && (
+            <span className="shrink-0 text-xs text-gray-400">已加入 {cartQty} 件</span>
           )}
         </div>
 
         {/* Cart control */}
-        {cartQty > 0 && (
-          <p className="text-center text-xs text-gray-400">已加入 {cartQty} 件</p>
-        )}
         <button
           onClick={onAdd}
           className="mt-1 w-full rounded-lg bg-gray-900 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 transition-colors"
