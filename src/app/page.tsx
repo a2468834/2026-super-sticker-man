@@ -83,6 +83,18 @@ export default function Home() {
             {totalItems > 0 ? `購物車 ${totalItems} 件` : '購物車是空的'}
           </span>
         </div>
+        <div className="border-t border-amber-100 bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-800">
+          僅用於活動前試算，實際金額、品項與優惠內容請見{' '}
+          <a
+            href="https://www.instagram.com/donot_like_sunday/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline hover:text-amber-900"
+          >
+            IG
+          </a>{' '}
+          公告
+        </div>
       </header>
 
       <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
