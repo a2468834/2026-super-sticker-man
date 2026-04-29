@@ -87,11 +87,16 @@ export function getEarnedGifts(
   total: number,
   hasReservation: boolean,
   isMember: boolean,
+  isNmsStaff: boolean,
 ): Gift[] {
   const gifts: Gift[] = []
 
   if (hasReservation) {
     gifts.push({ id: 'light-stick', name: '應援手燈' })
+  }
+
+  if (isNmsStaff) {
+    gifts.push({ id: 'mystery-gift', name: '神秘禮物' })
   }
 
   if (total >= 1500) {

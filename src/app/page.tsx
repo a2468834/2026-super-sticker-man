@@ -12,12 +12,13 @@ export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [hasReservation, setHasReservation] = useState(false)
   const [isMember, setIsMember] = useState(false)
+  const [isNmsStaff, setIsNmsStaff] = useState(false)
 
   const lineItems = useMemo(() => buildLineItems(cart), [cart])
   const total = useMemo(() => lineItems.reduce((s, l) => s + l.subtotal, 0), [lineItems])
   const gifts = useMemo(
-    () => getEarnedGifts(total, hasReservation, isMember),
-    [total, hasReservation, isMember],
+    () => getEarnedGifts(total, hasReservation, isMember, isNmsStaff),
+    [total, hasReservation, isMember, isNmsStaff],
   )
 
   function addToCart(categoryId: string, variantId: string) {
@@ -77,7 +78,9 @@ export default function Home() {
       <header className="sticky top-0 z-20 border-b border-gray-200 bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <h1 className="text-lg font-bold tracking-tight text-gray-900">
-            2026 Super Sticker Man
+            <a href="https://www.instagram.com/donot_like_sunday/p/DVV77AykmyB/">
+              Super Sticker Man 2026 貼紙展
+            </a>
           </h1>
           <span className="text-sm text-gray-500">
             {totalItems > 0 ? `購物車 ${totalItems} 件` : '購物車是空的'}
@@ -90,7 +93,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="font-semibold underline hover:text-amber-900"
           >
-            此頁內容僅供參考，售價、品項、庫存與優惠內容以現場為準，或請見{' '}IG{' '}公告
+            此頁僅供試算{' '}05/01{' '}至{' '}05/03{' '}創作者駐店活動，售價、品項、庫存與優惠內容皆以現場為準，或請見{' '}IG{' '}公告！
           </a>
         </div>
       </header>
@@ -105,8 +108,7 @@ export default function Home() {
               onChange={(e) => setHasReservation(e.target.checked)}
               className="h-4 w-4 rounded accent-gray-900"
             />
-            <span>線上預約活動並實際入場</span>
-            <span className="text-xs text-gray-400">（贈 應援手燈）</span>
+            <span>我有線上預約活動，並準時到場</span>
           </label>
           <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
             <input
@@ -115,8 +117,16 @@ export default function Home() {
               onChange={(e) => setIsMember(e.target.checked)}
               className="h-4 w-4 rounded accent-gray-900"
             />
-            <span>不良製作委員會身份</span>
-            <span className="text-xs text-gray-400">（IDOL卡套加贈專屬卡）</span>
+            <span>我有參加「不良製作委員會」</span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={isNmsStaff}
+              onChange={(e) => setIsNmsStaff(e.target.checked)}
+              className="h-4 w-4 rounded accent-gray-900"
+            />
+            <span>我是「NMS | 貼紙博物館」館員</span>
           </label>
         </div>
 

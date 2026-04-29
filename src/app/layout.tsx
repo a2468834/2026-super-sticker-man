@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "2026 Super Sticker Man",
-  description: "商品購物車試算模擬",
+  title: "Super Sticker Man 2026 貼紙展",
+  description: "「星期日拯救計畫」首次獨展",
 };
 
 export default function RootLayout({
