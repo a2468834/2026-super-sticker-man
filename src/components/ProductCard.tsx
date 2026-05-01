@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
 interface Props {
@@ -21,21 +20,10 @@ export default function ProductCard({
   onAdd,
 }: Props) {
   const isDiscounted = normalPrice != null && unitPrice < normalPrice
-  const [justAdded, setJustAdded] = useState(false)
-
-  useEffect(() => {
-    if (!justAdded) return
-    const timer = setTimeout(() => setJustAdded(false), 700)
-    return () => clearTimeout(timer)
-  }, [justAdded])
-
-  const handleAdd = () => {
-    onAdd()
-    setJustAdded(true)
-  }
+  const inCart = cartQty > 0
 
   return (
-    <div className={`flex flex-col rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-colors duration-500 ${justAdded ? 'bg-emerald-50' : 'bg-white'}`}>
+    <div className={`flex flex-col rounded-xl border shadow-sm overflow-hidden transition-colors duration-300 ${inCart ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-white'}`}>
       {/* Product image */}
       <div className="relative aspect-square w-full bg-gray-100">
         {image ? (
@@ -78,7 +66,7 @@ export default function ProductCard({
 
         {/* Cart control */}
         <button
-          onClick={handleAdd}
+          onClick={onAdd}
           className="mt-1 w-full rounded-lg bg-gray-900 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 transition-colors"
         >
           加入購物車
