@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 
 interface Props {
@@ -22,9 +23,16 @@ export default function ProductCard({
   onAdd,
 }: Props) {
   const isDiscounted = normalPrice != null && unitPrice < normalPrice
+  const [justAdded, setJustAdded] = useState(false)
+
+  const handleAdd = () => {
+    onAdd()
+    setJustAdded(true)
+    setTimeout(() => setJustAdded(false), 700)
+  }
 
   return (
-    <div className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className={`flex flex-col rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-colors duration-500 ${justAdded ? 'bg-emerald-50' : 'bg-white'}`}>
       {/* Product image */}
       <div className="relative aspect-square w-full bg-gray-100">
         {image ? (
@@ -67,7 +75,7 @@ export default function ProductCard({
 
         {/* Cart control */}
         <button
-          onClick={onAdd}
+          onClick={handleAdd}
           className="mt-1 w-full rounded-lg bg-gray-900 py-1.5 text-xs font-semibold text-white hover:bg-gray-700 transition-colors"
         >
           加入購物車
