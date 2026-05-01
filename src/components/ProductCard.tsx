@@ -1,11 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
 interface Props {
-  categoryId: string
-  variantId: string
   variantName: string
   image?: string
   unitPrice: number
@@ -25,10 +23,15 @@ export default function ProductCard({
   const isDiscounted = normalPrice != null && unitPrice < normalPrice
   const [justAdded, setJustAdded] = useState(false)
 
+  useEffect(() => {
+    if (!justAdded) return
+    const timer = setTimeout(() => setJustAdded(false), 700)
+    return () => clearTimeout(timer)
+  }, [justAdded])
+
   const handleAdd = () => {
     onAdd()
     setJustAdded(true)
-    setTimeout(() => setJustAdded(false), 700)
   }
 
   return (

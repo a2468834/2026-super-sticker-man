@@ -11,7 +11,6 @@ export type Gift = {
 export type LineItem = {
   categoryId: string
   variantId: string
-  sku: string
   categoryName: string
   variantName: string
   unitPrice: number
@@ -70,12 +69,10 @@ export function buildLineItems(items: CartItem[]): LineItem[] {
     const variantName = isAddon
       ? (cat.addon?.name ?? item.variantId)
       : (cat.variants.find((v) => v.sku === item.variantId)?.name ?? item.variantId)
-    const sku = item.variantId
     const unitPrice = resolveUnitPrice(item, bulkTotals)
     return [{
       categoryId: item.categoryId,
       variantId: item.variantId,
-      sku,
       categoryName: cat.name,
       variantName,
       unitPrice,
@@ -83,7 +80,7 @@ export function buildLineItems(items: CartItem[]): LineItem[] {
       subtotal: unitPrice * item.qty,
       isAddon,
     }]
-  }).sort((a, b) => a.sku.localeCompare(b.sku))
+  }).sort((a, b) => a.variantId.localeCompare(b.variantId))
 }
 
 export type GiftFlags = {

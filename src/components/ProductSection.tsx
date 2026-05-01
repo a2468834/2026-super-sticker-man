@@ -81,8 +81,6 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
           return (
             <ProductCard
               key={variant.sku}
-              categoryId={category.id}
-              variantId={variant.sku}
               variantName={variant.name}
               image={variant.image}
               unitPrice={effectivePrice}
