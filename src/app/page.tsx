@@ -59,11 +59,11 @@ export default function Home() {
       for (const cat of CATEGORIES) {
         if (!cat.addon) continue
         const baseQty = next
-          .filter((i) => i.categoryId === cat.id && i.variantId !== cat.addon!.id)
+          .filter((i) => i.categoryId === cat.id && i.variantId !== cat.addon!.sku)
           .reduce((s, i) => s + i.qty, 0)
         if (baseQty === 0) {
           next = next.filter(
-            (i) => !(i.categoryId === cat.id && i.variantId === cat.addon!.id),
+            (i) => !(i.categoryId === cat.id && i.variantId === cat.addon!.sku),
           )
         }
       }

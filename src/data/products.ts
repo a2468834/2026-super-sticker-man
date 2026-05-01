@@ -3,14 +3,12 @@ export type PricingRule =
   | { type: 'bulk'; normalPrice: number; discountPrice: number; minQty: number }
 
 export type Variant = {
-  id: string
   sku: string
   name: string
   image?: string
 }
 
 export type Addon = {
-  id: string
   sku: string
   name: string
   price: number
@@ -36,7 +34,6 @@ const v = (suffix: string, names: string[], images: string[] | undefined, skus: 
     console.error(`products: v('${suffix}') images.length ${images.length} !== names.length ${names.length}`)
   }
   return names.map((name, i) => ({
-    id: `${suffix}-${String.fromCharCode(97 + i)}`,
     sku: skus[i],
     name,
     image: images?.[i],
@@ -91,7 +88,7 @@ export const CATEGORIES: Category[] = [
       ['/images/貼紙簿-款式 A.jpg', '/images/貼紙簿-款式 B.jpg'],
       ['SKU-003-0001', 'SKU-003-0002'],
     ),
-    addon: { id: 'sticker-book-addon', sku: 'SKU-003-0003', name: '加價購 — 單面隨選貼', price: 30 },
+    addon: { sku: 'SKU-003-0003', name: '加價購 — 單面隨選貼', price: 30 },
   },
   {
     id: 'collab-house',

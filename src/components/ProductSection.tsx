@@ -21,7 +21,7 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
   // For bulk categories, compute total non-addon qty to determine effective price
   const bulkTotalQty = bulkPricing
     ? cart
-        .filter((i) => i.categoryId === category.id && i.variantId !== category.addon?.id)
+        .filter((i) => i.categoryId === category.id && i.variantId !== category.addon?.sku)
         .reduce((s, i) => s + i.qty, 0)
     : 0
 
@@ -40,10 +40,10 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
 
   // Addon state
   const addonQty = category.addon
-    ? getCartQty(cart, category.id, category.addon.id)
+    ? getCartQty(cart, category.id, category.addon.sku)
     : 0
   const stickerBookQty = cart
-    .filter((i) => i.categoryId === category.id && i.variantId !== category.addon?.id)
+    .filter((i) => i.categoryId === category.id && i.variantId !== category.addon?.sku)
     .reduce((s, i) => s + i.qty, 0)
   const canAddAddon = stickerBookQty > 0
 
@@ -77,18 +77,18 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
       {/* Variant grid */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
         {category.variants.map((variant) => {
-          const qty = getCartQty(cart, category.id, variant.id)
+          const qty = getCartQty(cart, category.id, variant.sku)
           return (
             <ProductCard
-              key={variant.id}
+              key={variant.sku}
               categoryId={category.id}
-              variantId={variant.id}
+              variantId={variant.sku}
               variantName={variant.name}
               image={variant.image}
               unitPrice={effectivePrice}
               normalPrice={normalPriceForCard}
               cartQty={qty}
-              onAdd={() => onAdd(category.id, variant.id)}
+              onAdd={() => onAdd(category.id, variant.sku)}
             />
           )
         })}
@@ -108,7 +108,7 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
           </div>
           {addonQty === 0 ? (
             <button
-              onClick={() => canAddAddon && onAdd(category.id, category.addon!.id)}
+              onClick={() => canAddAddon && onAdd(category.id, category.addon!.sku)}
               disabled={!canAddAddon}
               className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-300"
             >
@@ -117,14 +117,14 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
           ) : (
             <div className="flex items-center gap-2">
               <button
-                onClick={() => onUpdate(category.id, category.addon!.id, addonQty - 1)}
+                onClick={() => onUpdate(category.id, category.addon!.sku, addonQty - 1)}
                 className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-100"
               >
                 −
               </button>
               <span className="w-5 text-center text-sm font-semibold text-gray-800">{addonQty}</span>
               <button
-                onClick={() => onUpdate(category.id, category.addon!.id, addonQty + 1)}
+                onClick={() => onUpdate(category.id, category.addon!.sku, addonQty + 1)}
                 className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-100"
               >
                 +

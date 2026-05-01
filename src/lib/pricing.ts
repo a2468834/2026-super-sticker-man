@@ -24,7 +24,7 @@ export const GIFT_MILESTONES = [1500, 2000, 2500, 3000] as const
 
 function isAddonItem(categoryId: string, variantId: string): boolean {
   const cat = CATEGORIES.find((c) => c.id === categoryId)
-  return cat?.addon?.id === variantId
+  return cat?.addon?.sku === variantId
 }
 
 // Pre-compute total non-addon qty per bulk category in one pass — O(N).
@@ -69,10 +69,8 @@ export function buildLineItems(items: CartItem[]): LineItem[] {
     const isAddon = isAddonItem(item.categoryId, item.variantId)
     const variantName = isAddon
       ? (cat.addon?.name ?? item.variantId)
-      : (cat.variants.find((v) => v.id === item.variantId)?.name ?? item.variantId)
-    const sku = isAddon
-      ? (cat.addon?.sku ?? '')
-      : (cat.variants.find((v) => v.id === item.variantId)?.sku ?? '')
+      : (cat.variants.find((v) => v.sku === item.variantId)?.name ?? item.variantId)
+    const sku = item.variantId
     const unitPrice = resolveUnitPrice(item, bulkTotals)
     return [{
       categoryId: item.categoryId,
