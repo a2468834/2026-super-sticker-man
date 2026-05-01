@@ -10,6 +10,7 @@ import CartSummary from '@/components/CartSummary'
 
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([])
+  const [messageToSeller, setMessageToSeller] = useState('')
   const [hasReservation, setHasReservation] = useState(false)
   const [isMember, setIsMember] = useState(false)
   const [isNmsStaff, setIsNmsStaff] = useState(false)
@@ -165,7 +166,24 @@ export default function Home() {
                 onRemove={removeFromCart}
               />
               {lineItems.length > 0 && (
-                <div className="mt-4">
+                <div className="mt-4 space-y-4">
+                  <div className="border-t pt-3">
+                    <label
+                      htmlFor="seller-message"
+                      className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                    >
+                      留言板
+                    </label>
+                    <textarea
+                      id="seller-message"
+                      rows={4}
+                      spellCheck={false}
+                      value={messageToSeller}
+                      onChange={(e) => setMessageToSeller(e.target.value)}
+                      placeholder="有任何需求或備註，歡迎留言～"
+                      className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:outline-none"
+                    />
+                  </div>
                   <CartSummary total={total} gifts={gifts} />
                 </div>
               )}
