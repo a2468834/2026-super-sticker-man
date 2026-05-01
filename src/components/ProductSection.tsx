@@ -55,7 +55,7 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="mb-3 flex w-full items-baseline gap-3 text-left"
+        className={`mb-3 flex w-full items-baseline gap-3 rounded-xl px-4 py-2 text-left transition-colors duration-300 ${!isOpen ? 'bg-gray-200' : ''}`}
       >
         <h2 className="text-lg font-bold text-gray-900">{category.name}</h2>
         {bulkPricing && (
