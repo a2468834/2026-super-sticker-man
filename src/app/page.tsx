@@ -7,6 +7,7 @@ import { buildLineItems, getEarnedGifts } from '@/lib/pricing'
 import ProductSection from '@/components/ProductSection'
 import Cart from '@/components/Cart'
 import CartSummary from '@/components/CartSummary'
+import PasswordGate from '@/components/PasswordGate'
 
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([])
@@ -75,6 +76,7 @@ export default function Home() {
   const totalItems = cart.reduce((s, i) => s + i.qty, 0)
 
   return (
+    <PasswordGate>
     <div className="flex min-h-screen flex-col bg-gray-50">
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-gray-200 bg-white shadow-sm">
@@ -192,5 +194,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </PasswordGate>
   )
 }

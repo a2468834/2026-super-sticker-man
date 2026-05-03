@@ -31,6 +31,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm build
+        env:
+          NEXT_PUBLIC_PASSWORD: ${{ secrets.SITE_PASSWORD }}
 
       - uses: actions/configure-pages@v5
 
