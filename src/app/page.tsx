@@ -14,6 +14,25 @@ export default function Home() {
   const [messageToSeller, setMessageToSeller] = useState('')
   const [knowsTicket, setKnowsTicket] = useState(false)
   const [knowsQueueGift, setKnowsQueueGift] = useState(false)
+  // Sections are open unless listed here, so new categories default to open.
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
+
+  const allCollapsed = collapsedIds.size === CATEGORIES.length
+
+  function toggleCategory(categoryId: string) {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(categoryId)) next.delete(categoryId)
+      else next.add(categoryId)
+      return next
+    })
+  }
+
+  function toggleAll() {
+    setCollapsedIds((prev) =>
+      prev.size === CATEGORIES.length ? new Set() : new Set(CATEGORIES.map((c) => c.id)),
+    )
+  }
 
   const lineItems = useMemo(() => buildLineItems(cart), [cart])
   const total = useMemo(() => lineItems.reduce((s, l) => s + l.subtotal, 0), [lineItems])
@@ -138,16 +157,37 @@ export default function Home() {
         {/* Two-column layout */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           {/* Product list */}
-          <div className="min-w-0 flex-1 space-y-10">
-            {CATEGORIES.map((cat) => (
-              <ProductSection
-                key={cat.id}
-                category={cat}
-                cart={cart}
-                onAdd={addToCart}
-                onUpdate={updateCartQty}
-              />
-            ))}
+          <div className="min-w-0 flex-1">
+            <div className="mb-4 flex justify-end">
+              <button
+                type="button"
+                onClick={toggleAll}
+                className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
+              >
+                <svg
+                  className={`h-3.5 w-3.5 transition-transform duration-300 ${allCollapsed ? '-rotate-90' : 'rotate-0'}`}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                {allCollapsed ? '全部展開' : '全部收合'}
+              </button>
+            </div>
+            <div className="space-y-10">
+              {CATEGORIES.map((cat) => (
+                <ProductSection
+                  key={cat.id}
+                  category={cat}
+                  cart={cart}
+                  isOpen={!collapsedIds.has(cat.id)}
+                  onToggle={() => toggleCategory(cat.id)}
+                  onAdd={addToCart}
+                  onUpdate={updateCartQty}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Cart panel */}

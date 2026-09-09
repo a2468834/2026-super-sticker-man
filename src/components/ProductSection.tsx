@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
 import ProductCard from './ProductCard'
 import type { Category, CartItem } from '@/data/products'
@@ -8,6 +7,9 @@ import type { Category, CartItem } from '@/data/products'
 interface Props {
   category: Category
   cart: CartItem[]
+  // Open state is owned by the page so one control can fold every section.
+  isOpen: boolean
+  onToggle: () => void
   onAdd: (categoryId: string, variantId: string) => void
   onUpdate: (categoryId: string, variantId: string, qty: number) => void
 }
@@ -16,9 +18,7 @@ function getCartQty(cart: CartItem[], categoryId: string, variantId: string): nu
   return cart.find((i) => i.categoryId === categoryId && i.variantId === variantId)?.qty ?? 0
 }
 
-export default function ProductSection({ category, cart, onAdd, onUpdate }: Props) {
-  const [isOpen, setIsOpen] = useState(true)
-
+export default function ProductSection({ category, cart, isOpen, onToggle, onAdd, onUpdate }: Props) {
   const selectable = category.selectable !== false
   const options = category.options ?? []
 
@@ -44,7 +44,7 @@ export default function ProductSection({ category, cart, onAdd, onUpdate }: Prop
       {/* Category header — acts as accordion toggle */}
       <button
         type="button"
-        onClick={() => setIsOpen((o) => !o)}
+        onClick={onToggle}
         className={`mb-3 flex w-full items-baseline gap-3 rounded-xl px-4 py-2 text-left transition-colors duration-300 ${!isOpen ? 'bg-gray-200' : ''}`}
       >
         <h2 className="text-lg font-bold text-gray-900">{category.name}</h2>
