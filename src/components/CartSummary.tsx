@@ -18,7 +18,7 @@ const ALL_GIFTS_AT: { milestone: number; id: string; name: string; image?: strin
 // Each badge carries its own threshold, so it reads as a goal without
 // cross-referencing the progress bar.
 const giftLabel = (milestone: number, name: string) =>
-  `滿 NT$ ${milestone.toLocaleString()} ${name}`
+  `NT$ ${milestone.toLocaleString()} ${name}`
 
 export default function CartSummary({ total, gifts }: Props) {
   const earnedIds = new Set(gifts.map((g) => g.id))
