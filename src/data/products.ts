@@ -145,7 +145,8 @@ export const CATEGORIES: Category[] = [
     lineupImage: '/images/反光片吊飾.png',
     variants: v(
       'reflector',
-      ['FIND', 'SPARK', 'HEAL', 'KEEP', 'MISS'],
+      // Ordered left-to-right as they appear in the lineup photo.
+      ['MISS', 'FIND', 'SPARK', 'HEAL', 'KEEP'],
       undefined,
       ['SKU-007-0001', 'SKU-007-0002', 'SKU-007-0003', 'SKU-007-0004', 'SKU-007-0005'],
     ),
@@ -175,7 +176,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'tote-bag',
     name: '購物袋',
-    description: '搭配任意品項享加價購 NT$390；與任務號地墊同買自動折成套組 NT$900',
+    description: '搭配任意品項享加價購 NT$ 390；與任務號地墊同買自動折成套組 NT$ 900',
     pricing: { type: 'companion', soloPrice: 450, companionPrice: 390 },
     variants: v('tote', ['全一款'], ['/images/購物袋.jpg'], ['SKU-011-0001']),
   },

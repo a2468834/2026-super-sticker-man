@@ -15,9 +15,10 @@ const ALL_GIFTS_AT: { milestone: number; id: string; name: string; image?: strin
   { milestone: 3200, id: 'mission-mug', name: '任務杯', image: '/images/任務杯.jpg' },
 ]
 
-const THRESHOLD_LABELS: Record<number, string> = Object.fromEntries(
-  ALL_GIFTS_AT.map((g) => [g.milestone, `滿 ${g.milestone}｜${g.name}`]),
-)
+// Each badge carries its own threshold, so it reads as a goal without
+// cross-referencing the progress bar.
+const giftLabel = (milestone: number, name: string) =>
+  `滿 NT$ ${milestone.toLocaleString()} ${name}`
 
 export default function CartSummary({ total, gifts }: Props) {
   const earnedIds = new Set(gifts.map((g) => g.id))
@@ -57,9 +58,6 @@ export default function CartSummary({ total, gifts }: Props) {
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        {nextMilestone != null && (
-          <p className="mt-1 text-xs text-gray-400">{THRESHOLD_LABELS[nextMilestone]}</p>
-        )}
       </div>
 
       {/* Gift list */}
@@ -71,7 +69,12 @@ export default function CartSummary({ total, gifts }: Props) {
           {ALL_GIFTS_AT.map((g) => (
             <GiftBadge
               key={g.id}
-              gift={{ id: g.id, name: g.name, image: g.image, note: gifts.find((x) => x.id === g.id)?.note }}
+              gift={{
+                id: g.id,
+                name: giftLabel(g.milestone, g.name),
+                image: g.image,
+                note: gifts.find((x) => x.id === g.id)?.note,
+              }}
               earned={earnedIds.has(g.id)}
             />
           ))}

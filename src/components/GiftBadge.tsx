@@ -9,11 +9,11 @@ interface Props {
 export default function GiftBadge({ gift, earned }: Props) {
   return (
     <div
-      className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
         earned ? 'bg-green-50 text-green-800' : 'bg-gray-100 text-gray-400'
       }`}
     >
-      <span className="mt-0.5 font-bold">{earned ? '✓' : '○'}</span>
+      <span className="font-bold">{earned ? '✓' : '○'}</span>
       {gift.image && (
         <div
           className={`relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-white transition-all ${
