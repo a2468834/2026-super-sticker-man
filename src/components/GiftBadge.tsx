@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { Gift } from '@/lib/pricing'
 
 interface Props {
@@ -13,6 +14,21 @@ export default function GiftBadge({ gift, earned }: Props) {
       }`}
     >
       <span className="mt-0.5 font-bold">{earned ? '✓' : '○'}</span>
+      {gift.image && (
+        <div
+          className={`relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-white transition-all ${
+            earned ? '' : 'opacity-50 grayscale'
+          }`}
+        >
+          <Image
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}${gift.image}`}
+            alt={gift.name}
+            fill
+            className="object-cover"
+            sizes="40px"
+          />
+        </div>
+      )}
       <div className="min-w-0">
         <p className="font-medium">
           {gift.name}

@@ -1,4 +1,4 @@
-import { CATEGORIES } from '@/data/products'
+import { findCategory, findOption } from '@/data/products'
 import type { CartItem } from '@/data/products'
 
 export type Gift = {
@@ -6,6 +6,7 @@ export type Gift = {
   name: string
   qty?: number
   note?: string
+  image?: string
 }
 
 export type LineItem = {
@@ -16,110 +17,131 @@ export type LineItem = {
   unitPrice: number
   qty: number
   subtotal: number
-  isAddon: boolean
+  kind: 'product' | 'option' | 'discount'
 }
 
-export const GIFT_MILESTONES = [1500, 2000, 2500, 3000] as const
+export const GIFT_MILESTONES = [1200, 2000, 3200] as const
 
-function isAddonItem(categoryId: string, variantId: string): boolean {
-  const cat = CATEGORIES.find((c) => c.id === categoryId)
-  return cat?.addon?.sku === variantId
+// 盲抽扭蛋印章 — the 特典貼紙 tier depends on how many stamps the cart holds.
+const STAMP_SINGLE_SKU = 'SKU-001-0007'
+const STAMP_SET_SKU = 'SKU-001-0008'
+const STAMP_SET_COUNT = 6
+
+// Cross-category bundles, priced below the sum of their parts.
+const MAT_SKU = 'SKU-009-0001'
+const BAG_SKU = 'SKU-011-0001'
+
+const BUNDLES = [
+  {
+    id: 'bundle-mat-bag',
+    label: '套組優惠',
+    detail: '任務號地墊 ＋ 購物袋',
+    skus: [MAT_SKU, BAG_SKU],
+    price: 900,
+  },
+]
+
+function qtyOfSku(items: CartItem[], sku: string): number {
+  return items.reduce((s, i) => (i.variantId === sku ? s + i.qty : s), 0)
 }
 
-// Pre-compute total non-addon qty per bulk category in one pass — O(N).
-function computeBulkTotals(items: CartItem[]): Map<string, number> {
-  const totals = new Map<string, number>()
-  for (const item of items) {
-    const cat = CATEGORIES.find((c) => c.id === item.categoryId)
-    if (!cat || cat.pricing.type !== 'bulk') continue
-    if (isAddonItem(item.categoryId, item.variantId)) continue
-    totals.set(item.categoryId, (totals.get(item.categoryId) ?? 0) + item.qty)
-  }
-  return totals
-}
-
-// Private resolver that accepts pre-computed bulk totals to avoid O(N²).
-function resolveUnitPrice(item: CartItem, bulkTotals: Map<string, number>): number {
-  const cat = CATEGORIES.find((c) => c.id === item.categoryId)
+function resolveUnitPrice(item: CartItem, items: CartItem[]): number {
+  const cat = findCategory(item.categoryId)
   if (!cat) return 0
 
-  if (isAddonItem(item.categoryId, item.variantId)) {
-    return cat.addon!.price
-  }
+  const option = findOption(cat, item.variantId)
+  if (option) return option.price
 
-  if (cat.pricing.type === 'fixed') {
-    return cat.pricing.price
-  }
+  if (!cat.pricing) return 0
+  if (cat.pricing.type === 'fixed') return cat.pricing.price
 
-  const totalQty = bulkTotals.get(item.categoryId) ?? 0
-  return totalQty >= cat.pricing.minQty ? cat.pricing.discountPrice : cat.pricing.normalPrice
-}
-
-export function calcCartTotal(items: CartItem[]): number {
-  const bulkTotals = computeBulkTotals(items)
-  return items.reduce((sum, item) => sum + resolveUnitPrice(item, bulkTotals) * item.qty, 0)
+  // companion: discounted as long as the cart carries something from elsewhere.
+  const hasCompanion = items.some((i) => i.categoryId !== item.categoryId && i.qty > 0)
+  return hasCompanion ? cat.pricing.companionPrice : cat.pricing.soloPrice
 }
 
 export function buildLineItems(items: CartItem[]): LineItem[] {
-  const bulkTotals = computeBulkTotals(items)
-  return items.flatMap((item) => {
-    const cat = CATEGORIES.find((c) => c.id === item.categoryId)
-    if (!cat) return []
-    const isAddon = isAddonItem(item.categoryId, item.variantId)
-    const variantName = isAddon
-      ? (cat.addon?.name ?? item.variantId)
-      : (cat.variants.find((v) => v.sku === item.variantId)?.name ?? item.variantId)
-    const unitPrice = resolveUnitPrice(item, bulkTotals)
-    return [{
-      categoryId: item.categoryId,
-      variantId: item.variantId,
-      categoryName: cat.name,
-      variantName,
-      unitPrice,
-      qty: item.qty,
-      subtotal: unitPrice * item.qty,
-      isAddon,
-    }]
-  }).sort((a, b) => a.variantId.localeCompare(b.variantId))
+  const lines = items
+    .flatMap((item): LineItem[] => {
+      const cat = findCategory(item.categoryId)
+      if (!cat) return []
+      const option = findOption(cat, item.variantId)
+      const variantName = option
+        ? option.name
+        : (cat.variants.find((v) => v.sku === item.variantId)?.name ?? item.variantId)
+      const unitPrice = resolveUnitPrice(item, items)
+      return [{
+        categoryId: item.categoryId,
+        variantId: item.variantId,
+        categoryName: cat.name,
+        variantName,
+        unitPrice,
+        qty: item.qty,
+        subtotal: unitPrice * item.qty,
+        kind: option ? 'option' : 'product',
+      }]
+    })
+    .sort((a, b) => a.variantId.localeCompare(b.variantId))
+
+  // Bundle savings ride along as their own negative lines, so every product
+  // keeps its own honest unit price in the cart.
+  const priceBySku = new Map(lines.map((l) => [l.variantId, l.unitPrice]))
+  for (const bundle of BUNDLES) {
+    const pairs = Math.min(...bundle.skus.map((sku) => qtyOfSku(items, sku)))
+    if (pairs <= 0) continue
+    const partsTotal = bundle.skus.reduce((s, sku) => s + (priceBySku.get(sku) ?? 0), 0)
+    const saving = partsTotal - bundle.price
+    if (saving <= 0) continue
+    lines.push({
+      categoryId: bundle.id,
+      variantId: bundle.id,
+      categoryName: bundle.label,
+      variantName: bundle.detail,
+      unitPrice: -saving,
+      qty: pairs,
+      subtotal: -saving * pairs,
+      kind: 'discount',
+    })
+  }
+
+  return lines
 }
 
 export type GiftFlags = {
-  hasReservation: boolean
-  isMember: boolean
-  isNmsStaff: boolean
-  hasStamp: boolean
+  knowsTicket: boolean
+  knowsQueueGift: boolean
 }
 
-export function getEarnedGifts(total: number, flags: GiftFlags): Gift[] {
-  const { hasReservation, isMember, isNmsStaff, hasStamp } = flags
+export function getEarnedGifts(total: number, flags: GiftFlags, items: CartItem[]): Gift[] {
   const gifts: Gift[] = []
 
-  if (hasReservation) {
-    gifts.push({ id: 'light-stick', name: '應援手燈' })
+  if (flags.knowsQueueGift) {
+    gifts.push({ id: 'ribbon', name: '銀色刺繡絲帶', note: '排隊禮，記得先領' })
   }
 
-  if (isNmsStaff) {
-    gifts.push({ id: 'mystery-gift', name: '神秘禮物' })
+  const stampQty =
+    qtyOfSku(items, STAMP_SINGLE_SKU) + qtyOfSku(items, STAMP_SET_SKU) * STAMP_SET_COUNT
+  if (stampQty > 0) {
+    const qty = stampQty > 3 ? 2 : 1
+    gifts.push({
+      id: 'bonus-sticker',
+      name: '特典貼紙',
+      qty,
+      note: `盲抽扭蛋印章 ${stampQty} 顆`,
+      image: qty === 2 ? '/images/特典貼紙x2.png' : '/images/特典貼紙x1.png',
+    })
   }
 
-  if (hasStamp) {
-    gifts.push({ id: 'stamp', name: '鋼印隨便蓋' })
-  }
-
-  if (total >= 1500) {
-    const qty = Math.min(Math.floor(total / 1500), 2)
-    gifts.push({ id: 'golden-words', name: '金玉良言貼紙', qty })
+  if (total >= 1200) {
+    gifts.push({ id: 'flight-permit', name: '飛行許可證＋紀念章', image: '/images/飛行許可證.png' })
   }
 
   if (total >= 2000) {
-    const note = isMember
-      ? '隨機附贈兩款照片背景卡之一＋不良製作委員會專屬加贈卡一張'
-      : '隨機附贈兩款照片背景卡之一'
-    gifts.push({ id: 'idol-card', name: 'IDOL卡套', note })
+    gifts.push({ id: 'ufo-file', name: '不明飛行物 file', image: '/images/不明飛行物 file.png' })
   }
 
-  if (total >= 2500) {
-    gifts.push({ id: 'notebook-set', name: '白手帳套組' })
+  if (total >= 3200) {
+    gifts.push({ id: 'mission-mug', name: '任務杯', image: '/images/任務杯.jpg' })
   }
 
   return gifts

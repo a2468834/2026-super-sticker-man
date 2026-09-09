@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { CATEGORIES } from '@/data/products'
+import { CATEGORIES, maxQtyFor } from '@/data/products'
 import type { CartItem } from '@/data/products'
 import { buildLineItems, getEarnedGifts } from '@/lib/pricing'
 import ProductSection from '@/components/ProductSection'
@@ -12,24 +12,24 @@ import PasswordGate from '@/components/PasswordGate'
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [messageToSeller, setMessageToSeller] = useState('')
-  const [hasReservation, setHasReservation] = useState(false)
-  const [isMember, setIsMember] = useState(false)
-  const [isNmsStaff, setIsNmsStaff] = useState(false)
-  const [hasStamp, setHasStamp] = useState(false)
+  const [knowsTicket, setKnowsTicket] = useState(false)
+  const [knowsQueueGift, setKnowsQueueGift] = useState(false)
 
   const lineItems = useMemo(() => buildLineItems(cart), [cart])
   const total = useMemo(() => lineItems.reduce((s, l) => s + l.subtotal, 0), [lineItems])
   const gifts = useMemo(
-    () => getEarnedGifts(total, { hasReservation, isMember, isNmsStaff, hasStamp }),
-    [total, hasReservation, isMember, isNmsStaff, hasStamp],
+    () => getEarnedGifts(total, { knowsTicket, knowsQueueGift }, cart),
+    [total, knowsTicket, knowsQueueGift, cart],
   )
 
   function addToCart(categoryId: string, variantId: string) {
+    const cap = maxQtyFor(categoryId, variantId)
     setCart((prev) => {
       const existing = prev.find(
         (i) => i.categoryId === categoryId && i.variantId === variantId,
       )
       if (existing) {
+        if (cap != null && existing.qty >= cap) return prev
         return prev.map((i) =>
           i.categoryId === categoryId && i.variantId === variantId
             ? { ...i, qty: i.qty + 1 }
@@ -45,9 +45,11 @@ export default function Home() {
       removeFromCart(categoryId, variantId)
       return
     }
+    const cap = maxQtyFor(categoryId, variantId)
+    const capped = cap != null ? Math.min(qty, cap) : qty
     setCart((prev) =>
       prev.map((i) =>
-        i.categoryId === categoryId && i.variantId === variantId ? { ...i, qty } : i,
+        i.categoryId === categoryId && i.variantId === variantId ? { ...i, qty: capped } : i,
       ),
     )
   }
@@ -57,15 +59,18 @@ export default function Home() {
       let next = prev.filter(
         (i) => !(i.categoryId === categoryId && i.variantId === variantId),
       )
-      // Strip addons for any category whose base variants have dropped to 0.
+      // Drop gated options for any category whose ordinary items have hit 0.
       for (const cat of CATEGORIES) {
-        if (!cat.addon) continue
+        const gatedSkus = new Set(
+          (cat.options ?? []).filter((o) => o.requiresBase).map((o) => o.sku),
+        )
+        if (gatedSkus.size === 0) continue
         const baseQty = next
-          .filter((i) => i.categoryId === cat.id && i.variantId !== cat.addon!.sku)
+          .filter((i) => i.categoryId === cat.id && !gatedSkus.has(i.variantId))
           .reduce((s, i) => s + i.qty, 0)
         if (baseQty === 0) {
           next = next.filter(
-            (i) => !(i.categoryId === cat.id && i.variantId === cat.addon!.sku),
+            (i) => !(i.categoryId === cat.id && gatedSkus.has(i.variantId)),
           )
         }
       }
@@ -80,13 +85,18 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-gray-50">
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <h1 className="text-lg font-bold tracking-tight text-gray-900">
-            <a href="https://www.instagram.com/donot_like_sunday/p/DVV77AykmyB/">
-              Super Sticker Man 2026 貼紙展
-            </a>
-          </h1>
-          <span className="text-sm text-gray-500">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-bold tracking-tight text-gray-900">
+              <a href="https://www.instagram.com/donot_like_sunday/p/DVV77AykmyB/">
+                THE MISSION 2026
+              </a>
+            </h1>
+            <p className="truncate text-xs text-gray-500">
+              The Mission for everything you miss
+            </p>
+          </div>
+          <span className="shrink-0 text-sm text-gray-500">
             {totalItems > 0 ? `購物車 ${totalItems} 件` : '購物車是空的'}
           </span>
         </div>
@@ -97,49 +107,31 @@ export default function Home() {
             rel="noopener noreferrer"
             className="font-semibold underline hover:text-amber-900"
           >
-            此頁僅供試算{' '}05/01{' '}至{' '}05/03{' '}創作者駐店活動，售價、品項、庫存與優惠內容皆以現場為準，或請見{' '}IG{' '}公告！
+            此頁僅供試算{' '}09/11{' '}至{' '}09/13{' '}松菸文創園區 A2 倉庫 T50 攤位，售價、品項、庫存與優惠內容皆以現場為準，或請見{' '}IG{' '}公告！
           </a>
         </div>
       </header>
 
       <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
-        {/* Identity checkboxes */}
-        <div className="mb-6 flex flex-wrap gap-6 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+        {/* Self-reminders */}
+        <div className="mb-6 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
+          <label className="flex cursor-pointer items-start gap-2 text-sm text-gray-700">
             <input
               type="checkbox"
-              checked={hasReservation}
-              onChange={(e) => setHasReservation(e.target.checked)}
-              className="h-4 w-4 rounded accent-gray-900"
+              checked={knowsTicket}
+              onChange={(e) => setKnowsTicket(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded accent-gray-900"
             />
-            <span>我有線上預約活動，並準時到場</span>
+            <span>我知道領號碼牌，時段內才能逛攤位，星期五、星期六，找 S 領，10:00 ~ 13:00</span>
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+          <label className="flex cursor-pointer items-start gap-2 text-sm text-gray-700">
             <input
               type="checkbox"
-              checked={isMember}
-              onChange={(e) => setIsMember(e.target.checked)}
-              className="h-4 w-4 rounded accent-gray-900"
+              checked={knowsQueueGift}
+              onChange={(e) => setKnowsQueueGift(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded accent-gray-900"
             />
-            <span>我有參加「不良製作委員會」</span>
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={isNmsStaff}
-              onChange={(e) => setIsNmsStaff(e.target.checked)}
-              className="h-4 w-4 rounded accent-gray-900"
-            />
-            <span>我是「NMS | 貼紙博物館」館員</span>
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={hasStamp}
-              onChange={(e) => setHasStamp(e.target.checked)}
-              className="h-4 w-4 rounded accent-gray-900"
-            />
-            <span>我記得「現場免費蓋鋼印」</span>
+            <span>我知道要拿排隊禮「銀色刺繡絲帶」</span>
           </label>
         </div>
 
@@ -159,7 +151,7 @@ export default function Home() {
           </div>
 
           {/* Cart panel */}
-          <aside className="w-full lg:sticky lg:top-20 lg:w-80 xl:w-96">
+          <aside className="w-full lg:sticky lg:top-24 lg:w-80 xl:w-96">
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
               <h2 className="mb-3 text-base font-bold text-gray-900">購物車</h2>
               <Cart

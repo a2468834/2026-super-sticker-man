@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-const SESSION_KEY = 'stickerFair2026_unlocked'
+const SESSION_KEY = 'theMission2026_unlocked'
 
 export default function PasswordGate({ children }: { children: React.ReactNode }) {
   const password = process.env.NEXT_PUBLIC_PASSWORD
@@ -54,9 +54,9 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
         </div>
 
         <h1 className="mb-1 text-center text-lg font-bold tracking-tight text-gray-900">
-          Super Sticker Man 2026
+          THE MISSION 2026
         </h1>
-        <p className="mb-6 text-center text-sm text-gray-500">貼紙展</p>
+        <p className="mb-6 text-center text-sm text-gray-500">The Mission for everything you miss</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">

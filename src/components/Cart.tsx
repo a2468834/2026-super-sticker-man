@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { maxQtyFor } from '@/data/products'
 import type { LineItem } from '@/lib/pricing'
 
 interface Props {
@@ -42,7 +43,31 @@ export default function Cart({ lineItems, onUpdate, onRemove }: Props) {
     <ul className="divide-y divide-gray-100">
       {lineItems.map((item) => {
         const k = itemKey(item)
+
+        // Bundle savings are derived, not something the shopper edits directly.
+        if (item.kind === 'discount') {
+          return (
+            <li key={k} className="flex items-start gap-3 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-emerald-700">
+                  {item.categoryName}
+                </p>
+                <p className="truncate text-xs text-gray-500">{item.variantName}</p>
+                <p className="mt-0.5 text-xs text-gray-400">
+                  −NT$ {Math.abs(item.unitPrice)} × {item.qty} ={' '}
+                  <span className="font-semibold text-emerald-600">
+                    −NT$ {Math.abs(item.subtotal).toLocaleString()}
+                  </span>
+                </p>
+              </div>
+            </li>
+          )
+        }
+
         const displayValue = drafts[k] ?? String(item.qty)
+        const maxQty = maxQtyFor(item.categoryId, item.variantId)
+        const atCap = maxQty != null && item.qty >= maxQty
+
         return (
           <li key={k} className="flex items-start gap-3 py-3">
             {/* Name */}
@@ -84,7 +109,8 @@ export default function Cart({ lineItems, onUpdate, onRemove }: Props) {
               />
               <button
                 onClick={() => onUpdate(item.categoryId, item.variantId, item.qty + 1)}
-                className="flex h-6 w-6 items-center justify-center rounded border border-gray-300 text-sm leading-none text-gray-700 hover:bg-gray-100"
+                disabled={atCap}
+                className="flex h-6 w-6 items-center justify-center rounded border border-gray-300 text-sm leading-none text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-300"
                 aria-label="增加數量"
               >
                 +

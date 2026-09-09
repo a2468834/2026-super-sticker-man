@@ -9,19 +9,15 @@ interface Props {
   gifts: Gift[]
 }
 
-const THRESHOLD_LABELS: Record<number, string> = {
-  1500: '滿 1500｜金玉良言貼紙',
-  2000: '滿 2000｜IDOL卡套',
-  2500: '滿 2500｜白手帳套組',
-  3000: '滿 3000｜金玉良言貼紙二張',
-}
-
-const ALL_GIFTS_AT: { milestone: number; id: string; name: string; qty?: number }[] = [
-  { milestone: 1500, id: 'golden-words', name: '金玉良言貼紙', qty: 1 },
-  { milestone: 2000, id: 'idol-card', name: 'IDOL卡套' },
-  { milestone: 2500, id: 'notebook-set', name: '白手帳套組' },
-  { milestone: 3000, id: 'golden-words-2', name: '金玉良言貼紙二張', qty: 2 },
+const ALL_GIFTS_AT: { milestone: number; id: string; name: string; image?: string }[] = [
+  { milestone: 1200, id: 'flight-permit', name: '飛行許可證＋紀念章', image: '/images/飛行許可證.png' },
+  { milestone: 2000, id: 'ufo-file', name: '不明飛行物 file', image: '/images/不明飛行物 file.png' },
+  { milestone: 3200, id: 'mission-mug', name: '任務杯', image: '/images/任務杯.jpg' },
 ]
+
+const THRESHOLD_LABELS: Record<number, string> = Object.fromEntries(
+  ALL_GIFTS_AT.map((g) => [g.milestone, `滿 ${g.milestone}｜${g.name}`]),
+)
 
 export default function CartSummary({ total, gifts }: Props) {
   const earnedIds = new Set(gifts.map((g) => g.id))
@@ -72,28 +68,19 @@ export default function CartSummary({ total, gifts }: Props) {
           滿額贈品
         </p>
         <div className="space-y-1.5">
-          {(() => {
-            const liveGoldenQty = gifts.find((x) => x.id === 'golden-words')?.qty ?? 0
-            return ALL_GIFTS_AT.map((g) => {
-              const isGoldenRow = g.id === 'golden-words' || g.id === 'golden-words-2'
-              const earned = isGoldenRow
-                ? liveGoldenQty === g.qty!
-                : earnedIds.has(g.id)
-              // Qty pinned to milestone definition; note looked up by canonical live id.
-              const liveId = g.id === 'golden-words-2' ? 'golden-words' : g.id
-              const liveNote = gifts.find((x) => x.id === liveId)?.note
-              const displayGift = { id: g.id, name: g.name, qty: g.id === 'golden-words-2' ? undefined : g.qty, note: liveNote }
-              return (
-                <GiftBadge key={`${g.id}-${g.milestone}`} gift={displayGift} earned={earned} />
-              )
-            })
-          })()}
+          {ALL_GIFTS_AT.map((g) => (
+            <GiftBadge
+              key={g.id}
+              gift={{ id: g.id, name: g.name, image: g.image, note: gifts.find((x) => x.id === g.id)?.note }}
+              earned={earnedIds.has(g.id)}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Identity-based gifts — anything not tied to a spending milestone */}
+      {/* Activity gifts — anything not tied to a spending milestone */}
       {(() => {
-        const milestoneIds = new Set(ALL_GIFTS_AT.map((g) => g.id === 'golden-words-2' ? 'golden-words' : g.id))
+        const milestoneIds = new Set(ALL_GIFTS_AT.map((g) => g.id))
         const activityGifts = gifts.filter((g) => !milestoneIds.has(g.id))
         if (activityGifts.length === 0) return null
         return (
