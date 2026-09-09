@@ -116,7 +116,12 @@ export function getEarnedGifts(total: number, flags: GiftFlags, items: CartItem[
   const gifts: Gift[] = []
 
   if (flags.knowsQueueGift) {
-    gifts.push({ id: 'ribbon', name: '銀色刺繡絲帶', note: '排隊禮，記得先領' })
+    gifts.push({
+      id: 'ribbon',
+      name: '銀色刺繡絲帶',
+      note: '排隊禮，記得先領',
+      image: '/images/銀色刺繡絲帶.jpg',
+    })
   }
 
   const stampQty =
