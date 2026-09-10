@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { CATEGORIES, maxQtyFor } from '@/data/products'
 import type { CartItem } from '@/data/products'
 import { buildLineItems, getEarnedGifts } from '@/lib/pricing'
+import { parseSkuText } from '@/lib/skuText'
 import ProductSection from '@/components/ProductSection'
 import Cart from '@/components/Cart'
 import CartSummary from '@/components/CartSummary'
@@ -98,6 +99,19 @@ export default function Home() {
     })
   }
 
+  // A split plan's "開新分頁" button encodes one order in the URL hash; picking
+  // it up here is what makes that tab open with the order already loaded.
+  useEffect(() => {
+    const encoded = /^#sku=(.*)$/.exec(window.location.hash)?.[1]
+    if (!encoded) return
+    try {
+      const parsed = parseSkuText(decodeURIComponent(encoded))
+      if (parsed.items.length > 0) setCart(parsed.items)
+    } catch {
+      // A malformed hash just means we leave the cart empty.
+    }
+  }, [])
+
   // The SKU box is a view of the cart, so applying it replaces the contents.
   // parseSkuText has already clamped per-person caps and dropped orphan add-ons.
   function applySkus(items: CartItem[]) {
@@ -137,7 +151,7 @@ export default function Home() {
 
       <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
         {/* Self-reminders */}
-        <div className="mb-6 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
+        <div className="mb-6 flex flex-wrap items-center gap-x-8 gap-y-2 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
           <label className="flex cursor-pointer items-start gap-2 text-sm text-gray-700">
             <input
               type="checkbox"

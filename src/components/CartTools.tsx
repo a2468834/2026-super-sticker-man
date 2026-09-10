@@ -19,10 +19,17 @@ function SkuLine({ text }: { text: string }) {
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      setTimeout(() => setCopied(false), 3000)
     } catch {
       // Clipboard can be blocked; the field is selectable as a fallback.
     }
+  }
+
+  // The hash is read on load, so the new tab opens with this order already in
+  // its cart — no copy-paste step at all.
+  function openInNewTab() {
+    const url = `${window.location.pathname}#sku=${encodeURIComponent(text)}`
+    window.open(url, '_blank', 'noopener')
   }
 
   return (
@@ -36,9 +43,20 @@ function SkuLine({ text }: { text: string }) {
       <button
         type="button"
         onClick={copy}
+        className={`shrink-0 rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${
+          copied
+            ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+            : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'
+        }`}
+      >
+        {copied ? '✓ 已複製' : '複製'}
+      </button>
+      <button
+        type="button"
+        onClick={openInNewTab}
         className="shrink-0 rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
       >
-        {copied ? '已複製' : '複製'}
+        開新分頁
       </button>
     </div>
   )
