@@ -8,12 +8,12 @@ import type { LineItem } from '@/lib/pricing'
 
 interface Props {
   lineItems: LineItem[]
-  onAddSkus: (items: CartItem[]) => void
+  onApplySkus: (items: CartItem[]) => void
   onUpdate: (categoryId: string, variantId: string, qty: number) => void
   onRemove: (categoryId: string, variantId: string) => void
 }
 
-export default function Cart({ lineItems, onAddSkus, onUpdate, onRemove }: Props) {
+export default function Cart({ lineItems, onApplySkus, onUpdate, onRemove }: Props) {
   const [drafts, setDrafts] = useState<Record<string, string>>({})
 
   // An empty cart is the natural place to offer the bulk paste, which is how
@@ -21,7 +21,13 @@ export default function Cart({ lineItems, onAddSkus, onUpdate, onRemove }: Props
   if (lineItems.length === 0) {
     return (
       <div className="py-2">
-        <SkuInput label="貼上 SKU 直接加入購物車" rows={3} onAddSkus={onAddSkus} />
+        <SkuInput
+          label="貼上 SKU 直接加入購物車"
+          applyLabel="加入購物車"
+          rows={3}
+          cart={[]}
+          onApply={onApplySkus}
+        />
       </div>
     )
   }

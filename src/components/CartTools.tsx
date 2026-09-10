@@ -9,7 +9,7 @@ import type { SplitResult, SplitPlan } from '@/lib/split'
 
 interface Props {
   cart: CartItem[]
-  onAddSkus: (items: CartItem[]) => void
+  onApplySkus: (items: CartItem[]) => void
 }
 
 function SkuLine({ text }: { text: string }) {
@@ -69,7 +69,7 @@ function PlanDetail({ plan }: { plan: SplitPlan }) {
   )
 }
 
-export default function CartTools({ cart, onAddSkus }: Props) {
+export default function CartTools({ cart, onApplySkus }: Props) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -127,7 +127,7 @@ export default function CartTools({ cart, onAddSkus }: Props) {
         <div className="overflow-hidden">
           <div className="space-y-5 border-t border-gray-100 px-5 py-4">
             {/* Bulk SKU entry */}
-            <SkuInput label="批次輸入 SKU" onAddSkus={onAddSkus} />
+            <SkuInput cart={cart} onApply={onApplySkus} />
 
             {/* Split calculator */}
             <div className="border-t border-gray-100 pt-4">

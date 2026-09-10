@@ -98,24 +98,10 @@ export default function Home() {
     })
   }
 
-  // Bulk entry from a pasted SKU string; merges into whatever is already there.
-  function addSkusToCart(items: CartItem[]) {
-    setCart((prev) => {
-      const next = prev.map((i) => ({ ...i }))
-      for (const item of items) {
-        const cap = maxQtyFor(item.categoryId, item.variantId)
-        const existing = next.find(
-          (i) => i.categoryId === item.categoryId && i.variantId === item.variantId,
-        )
-        if (existing) {
-          const merged = existing.qty + item.qty
-          existing.qty = cap != null ? Math.min(merged, cap) : merged
-        } else {
-          next.push({ ...item, qty: cap != null ? Math.min(item.qty, cap) : item.qty })
-        }
-      }
-      return next
-    })
+  // The SKU box is a view of the cart, so applying it replaces the contents.
+  // parseSkuText has already clamped per-person caps and dropped orphan add-ons.
+  function applySkus(items: CartItem[]) {
+    setCart(items)
   }
 
   const totalItems = cart.reduce((s, i) => s + i.qty, 0)
@@ -172,7 +158,7 @@ export default function Home() {
           </label>
         </div>
 
-        <CartTools cart={cart} onAddSkus={addSkusToCart} />
+        <CartTools cart={cart} onApplySkus={applySkus} />
 
         {/* Two-column layout */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -219,7 +205,7 @@ export default function Home() {
               </div>
               <Cart
                 lineItems={lineItems}
-                onAddSkus={addSkusToCart}
+                onApplySkus={applySkus}
                 onUpdate={updateCartQty}
                 onRemove={removeFromCart}
               />
