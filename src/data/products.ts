@@ -56,7 +56,7 @@ const v = (suffix: string, names: string[], images: string[] | undefined, skus: 
 export const CATEGORIES: Category[] = [
   {
     id: 'blind-stamp',
-    name: '盲抽扭蛋印章：LOVE MISSION 999 愛你不只 99',
+    name: '扭蛋印章：LOVE MISSION 999',
     description: '買 1~3 顆贈特典貼紙 ×1，超過 3 顆贈特典貼紙 ×2',
     selectable: false,
     variants: v(
@@ -95,7 +95,7 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'blind-magnet',
-    name: '盲抽厚紙磁鐵',
+    name: '厚紙磁鐵',
     selectable: false,
     variants: v(
       'magnet',
@@ -140,7 +140,7 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'blind-reflector',
-    name: '盲抽反光片吊飾',
+    name: '反光片吊飾',
     selectable: false,
     lineupImage: '/images/反光片吊飾.png',
     variants: v(
@@ -176,7 +176,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'tote-bag',
     name: '購物袋',
-    description: '搭配任意品項享加價購 NT$ 390；與任務號地墊同買自動折成套組 NT$ 900',
+    description: '搭配任意品項享加價購 NT$ 390；與任務號地墊同買享套組價 NT$ 900',
     pricing: { type: 'companion', soloPrice: 450, companionPrice: 390 },
     variants: v('tote', ['全一款'], ['/images/購物袋.jpg'], ['SKU-011-0001']),
   },

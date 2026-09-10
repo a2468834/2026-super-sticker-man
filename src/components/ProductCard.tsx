@@ -6,6 +6,8 @@ interface Props {
   variantName: string
   image?: string
   unitPrice?: number
+  // Original price, shown struck through when unitPrice is a discount.
+  normalPrice?: number
   cartQty?: number
   maxQty?: number
   // 盲抽 lineup: show the artwork only, buying happens through the option rows.
@@ -17,12 +19,14 @@ export default function ProductCard({
   variantName,
   image,
   unitPrice,
+  normalPrice,
   cartQty = 0,
   maxQty,
   displayOnly = false,
   onAdd,
 }: Props) {
   const inCart = !displayOnly && cartQty > 0
+  const discounted = normalPrice != null && unitPrice != null && unitPrice < normalPrice
   const atCap = maxQty != null && cartQty >= maxQty
 
   return (
@@ -56,7 +60,14 @@ export default function ProductCard({
           <>
             {/* Price + in-cart indicator on the same line */}
             <div className="flex items-baseline justify-between gap-1.5">
-              <span className="text-sm font-bold text-gray-900">NT$ {unitPrice}</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className={`text-sm font-bold ${discounted ? 'text-red-600' : 'text-gray-900'}`}>
+                  NT$ {unitPrice}
+                </span>
+                {discounted && (
+                  <span className="text-xs text-gray-400 line-through">NT$ {normalPrice}</span>
+                )}
+              </div>
               {cartQty > 0 && (
                 <span className="shrink-0 text-xs text-gray-400">已加入 {cartQty} 件</span>
               )}

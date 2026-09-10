@@ -136,9 +136,6 @@ export default function Home() {
               The Mission for everything you miss
             </p>
           </div>
-          <span className="shrink-0 text-sm text-gray-500">
-            {totalItems > 0 ? `購物車 ${totalItems} 件` : '購物車是空的'}
-          </span>
         </div>
         <div className="border-t border-amber-100 bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-800">
           <a
@@ -216,9 +213,13 @@ export default function Home() {
           {/* Cart panel */}
           <aside className="w-full lg:sticky lg:top-24 lg:w-80 xl:w-96">
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-base font-bold text-gray-900">購物車</h2>
+              <div className="mb-3 flex items-baseline justify-between gap-2">
+                <h2 className="text-base font-bold text-gray-900">購物車</h2>
+                <span className="text-xs text-gray-500">{totalItems} 件</span>
+              </div>
               <Cart
                 lineItems={lineItems}
+                onAddSkus={addSkusToCart}
                 onUpdate={updateCartQty}
                 onRemove={removeFromCart}
               />

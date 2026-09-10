@@ -132,7 +132,7 @@ export function getEarnedGifts(total: number, flags: GiftFlags, items: CartItem[
       id: 'bonus-sticker',
       name: '特典貼紙',
       qty,
-      note: `盲抽扭蛋印章 ${stampQty} 顆`,
+      note: `扭蛋印章 ${stampQty} 顆`,
       image: qty === 2 ? '/images/特典貼紙x2.png' : '/images/特典貼紙x1.png',
     })
   }

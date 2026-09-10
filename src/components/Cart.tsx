@@ -1,21 +1,28 @@
 'use client'
 
 import { useState } from 'react'
+import SkuInput from './SkuInput'
 import { maxQtyFor } from '@/data/products'
+import type { CartItem } from '@/data/products'
 import type { LineItem } from '@/lib/pricing'
 
 interface Props {
   lineItems: LineItem[]
+  onAddSkus: (items: CartItem[]) => void
   onUpdate: (categoryId: string, variantId: string, qty: number) => void
   onRemove: (categoryId: string, variantId: string) => void
 }
 
-export default function Cart({ lineItems, onUpdate, onRemove }: Props) {
+export default function Cart({ lineItems, onAddSkus, onUpdate, onRemove }: Props) {
   const [drafts, setDrafts] = useState<Record<string, string>>({})
 
+  // An empty cart is the natural place to offer the bulk paste, which is how
+  // a split plan gets previewed in a fresh tab.
   if (lineItems.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-gray-400">購物車是空的</p>
+      <div className="py-2">
+        <SkuInput label="貼上 SKU 直接加入購物車" rows={3} onAddSkus={onAddSkus} />
+      </div>
     )
   }
 

@@ -22,15 +22,24 @@ export default function ProductSection({ category, cart, isOpen, onToggle, onAdd
   const selectable = category.selectable !== false
   const options = category.options ?? []
 
-  const fixedPrice = category.pricing?.type === 'fixed' ? category.pricing.price : undefined
+  // Prices live on the cards below; the header carries the category's SKU
+  // series instead, which is what the bulk-input box speaks.
+  const skuSeries = /^(SKU-\d{3})/.exec(category.variants[0]?.sku ?? '')?.[1] ?? null
 
-  const priceHint = category.pricing
+  // 購物袋 is cheaper as soon as the cart holds anything else, so its card has
+  // to price against the live cart rather than a single fixed number.
+  const hasOtherCategory = cart.some((i) => i.categoryId !== category.id && i.qty > 0)
+  const cardPrice = category.pricing
     ? category.pricing.type === 'fixed'
-      ? `NT$ ${category.pricing.price} / 件`
-      : `NT$ ${category.pricing.soloPrice} / 件（加價購 NT$ ${category.pricing.companionPrice}）`
-    : options.length > 0
-      ? `NT$ ${Math.min(...options.map((o) => o.price))} 起`
-      : null
+      ? category.pricing.price
+      : hasOtherCategory
+        ? category.pricing.companionPrice
+        : category.pricing.soloPrice
+    : undefined
+  const cardWasPrice =
+    category.pricing?.type === 'companion' && hasOtherCategory
+      ? category.pricing.soloPrice
+      : undefined
 
   // An option marked requiresBase needs at least one ordinary item from the
   // same category already in the cart.
@@ -48,7 +57,9 @@ export default function ProductSection({ category, cart, isOpen, onToggle, onAdd
         className={`mb-3 flex w-full items-baseline gap-3 rounded-xl px-4 py-2 text-left transition-colors duration-300 ${!isOpen ? 'bg-gray-200' : ''}`}
       >
         <h2 className="text-lg font-bold text-gray-900">{category.name}</h2>
-        {priceHint && <span className="text-xs text-gray-400">{priceHint}</span>}
+        {skuSeries && (
+          <span className="font-mono text-xs text-gray-400">{skuSeries}</span>
+        )}
         {category.description && (
           <span className="text-xs text-gray-400">（{category.description}）</span>
         )}
@@ -101,7 +112,8 @@ export default function ProductSection({ category, cart, isOpen, onToggle, onAdd
                     key={variant.sku}
                     variantName={variant.name}
                     image={variant.image}
-                    unitPrice={fixedPrice}
+                    unitPrice={cardPrice}
+                    normalPrice={cardWasPrice}
                     cartQty={qty}
                     maxQty={variant.maxQty}
                     displayOnly={!selectable}

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import type { CartItem } from '@/data/products'
-import { parseSkuText, formatSkuText } from '@/lib/skuText'
+import SkuInput from './SkuInput'
+import { formatSkuText } from '@/lib/skuText'
 import { findBestSplit } from '@/lib/split'
 import type { SplitResult, SplitPlan } from '@/lib/split'
 
@@ -70,22 +71,10 @@ function PlanDetail({ plan }: { plan: SplitPlan }) {
 
 export default function CartTools({ cart, onAddSkus }: Props) {
   const [open, setOpen] = useState(false)
-  const [text, setText] = useState('')
-  const [feedback, setFeedback] = useState<{ errors: string[]; notes: string[] } | null>(null)
-
   const [busy, setBusy] = useState(false)
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<SplitResult | null>(null)
   const [shownCount, setShownCount] = useState<number | null>(null)
-
-  function handleAdd() {
-    const parsed = parseSkuText(text)
-    setFeedback({ errors: parsed.errors, notes: parsed.notes })
-    if (parsed.items.length > 0) {
-      onAddSkus(parsed.items)
-      setText('')
-    }
-  }
 
   async function handleSplit() {
     setBusy(true)
@@ -111,7 +100,7 @@ export default function CartTools({ cart, onAddSkus }: Props) {
         className="flex w-full items-center gap-2 px-5 py-3 text-left"
       >
         <span className="text-sm font-semibold text-gray-800">批次輸入 ∕ 拆單試算</span>
-        <span className="text-xs text-gray-400">貼上 SKU 字串建立購物車，或試算怎麼拆單最多贈品</span>
+        <span className="text-xs text-gray-400">貼上 SKU 字串直接加車，然後試算怎麼拆單最划算</span>
         <svg
           className={`ml-auto h-4 w-4 shrink-0 text-gray-400 transition-transform duration-300 ${open ? 'rotate-0' : '-rotate-90'}`}
           viewBox="0 0 20 20"
@@ -126,37 +115,7 @@ export default function CartTools({ cart, onAddSkus }: Props) {
         <div className="overflow-hidden">
           <div className="space-y-5 border-t border-gray-100 px-5 py-4">
             {/* Bulk SKU entry */}
-            <div>
-              <label htmlFor="sku-input" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                批次輸入 SKU
-              </label>
-              <textarea
-                id="sku-input"
-                rows={3}
-                spellCheck={false}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="SKU-001-0007*4 SKU-002-0001*2"
-                className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-800 placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:outline-none"
-              />
-              <div className="mt-2 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleAdd}
-                  disabled={text.trim() === ''}
-                  className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-                >
-                  加入購物車
-                </button>
-                <span className="text-xs text-gray-400">數量可用 * 或 x 指定，預設 1</span>
-              </div>
-              {feedback?.errors.map((e) => (
-                <p key={e} className="mt-1 text-xs text-red-500">{e}</p>
-              ))}
-              {feedback?.notes.map((n) => (
-                <p key={n} className="mt-1 text-xs text-amber-600">{n}</p>
-              ))}
-            </div>
+            <SkuInput label="批次輸入 SKU" onAddSkus={onAddSkus} />
 
             {/* Split calculator */}
             <div className="border-t border-gray-100 pt-4">
@@ -175,9 +134,6 @@ export default function CartTools({ cart, onAddSkus }: Props) {
                   )}
                   {busy ? `試算中 ${Math.round(progress * 100)}%` : '試算拆單'}
                 </button>
-                <span className="text-xs text-gray-400">
-                  活動規定一次只能結帳一筆，多筆需分次排隊或分天前往
-                </span>
               </div>
 
               {result && shownPlan && (
