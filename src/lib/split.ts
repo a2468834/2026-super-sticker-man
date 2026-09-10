@@ -20,6 +20,8 @@ export type SplitPlan = {
   totalCost: number
   // Extra orders each category is scattered across; 0 = every category kept whole.
   spread: number
+  // Distinct gift kinds collected across all orders.
+  coverage: number
 }
 
 /* ------------------------------------------------------------------ *
@@ -147,11 +149,15 @@ function evaluate(atoms: Atom[], assign: number[], k: number): SplitPlan {
   let spread = 0
   for (const seen of categorySpread.values()) spread += seen.size - 1
 
+  const giftKinds = new Set<string>()
+  for (const order of orders) for (const gift of order.gifts) giftKinds.add(gift.id)
+
   const plan: SplitPlan = {
     orders,
     giftCount: orders.reduce((s, o) => s + o.giftCount, 0),
     totalCost: orders.reduce((s, o) => s + o.subtotal, 0),
     spread,
+    coverage: giftKinds.size,
   }
 
   if (planCache.size >= PLAN_CACHE_LIMIT) planCache.clear()
@@ -169,10 +175,19 @@ function evaluate(atoms: Atom[], assign: number[], k: number): SplitPlan {
  */
 export type Cohesion = 'group' | 'spread'
 
-// Lexicographic: gifts first, then money, then the chosen cohesion direction.
-function makeComparator(cohesion: Cohesion) {
+/**
+ * Lexicographic scoring.
+ *
+ * Raw count alone can quietly drop a whole gift kind: many NT$ 2,000 orders
+ * beat one big order on gifts-per-dollar, but nothing then reaches NT$ 3,200
+ * and the 任務杯 is never earned. `coverage` puts variety ahead of count so
+ * that trade can be refused. It is a preference, not a hard rule — a cart that
+ * simply cannot reach a tier still gets the best plan available.
+ */
+function makeComparator(cohesion: Cohesion, coverageFirst: boolean) {
   return (a: SplitPlan, b: SplitPlan | null): boolean => {
     if (!b) return true
+    if (coverageFirst && a.coverage !== b.coverage) return a.coverage > b.coverage
     if (a.giftCount !== b.giftCount) return a.giftCount > b.giftCount
     if (a.totalCost !== b.totalCost) return a.totalCost < b.totalCost
     return cohesion === 'group' ? a.spread < b.spread : a.spread > b.spread
@@ -312,6 +327,8 @@ export type SplitOptions = {
   maxOrders?: number
   restarts?: number
   cohesion?: Cohesion
+  // Prefer collecting every kind of gift over collecting the most gifts.
+  coverageFirst?: boolean
   onProgress?: (fraction: number) => void
 }
 
@@ -323,9 +340,10 @@ export async function findBestSplit(
     maxOrders: maxOrdersOpt = DEFAULT_MAX_ORDERS,
     restarts = 40,
     cohesion = 'group',
+    coverageFirst = false,
     onProgress,
   } = options
-  const isBetter = makeComparator(cohesion)
+  const isBetter = makeComparator(cohesion, coverageFirst)
 
   const atoms = toAtoms(cart)
   if (atoms.length === 0) return null

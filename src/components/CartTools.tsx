@@ -76,6 +76,13 @@ export default function CartTools({ cart, onAddSkus }: Props) {
   const [result, setResult] = useState<SplitResult | null>(null)
   const [shownCount, setShownCount] = useState<number | null>(null)
   const [groupSameCategory, setGroupSameCategory] = useState(true)
+  const [coverageFirst, setCoverageFirst] = useState(false)
+
+  // Any setting change invalidates the plan on screen.
+  function clearPlan() {
+    setResult(null)
+    setShownCount(null)
+  }
 
   async function handleSplit() {
     setBusy(true)
@@ -86,6 +93,7 @@ export default function CartTools({ cart, onAddSkus }: Props) {
     await new Promise((r) => setTimeout(r, 0))
     const found = await findBestSplit(cart, {
       cohesion: groupSameCategory ? 'group' : 'spread',
+      coverageFirst,
       onProgress: setProgress,
     })
     setResult(found)
@@ -145,16 +153,30 @@ export default function CartTools({ cart, onAddSkus }: Props) {
                     checked={groupSameCategory}
                     onChange={(e) => {
                       setGroupSameCategory(e.target.checked)
-                      // The shown plan was optimised for the old setting.
-                      setResult(null)
-                      setShownCount(null)
+                      clearPlan()
                     }}
                     className="h-4 w-4 rounded accent-gray-900"
                   />
-                  <span>同類品項盡量集中在同一筆訂單</span>
+                  <span>集中下單同類品項</span>
                 </label>
                 <span className="text-xs text-gray-400">
                   取消勾選則盡量分散，盲抽可分批開獎
+                </span>
+
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={coverageFirst}
+                    onChange={(e) => {
+                      setCoverageFirst(e.target.checked)
+                      clearPlan()
+                    }}
+                    className="h-4 w-4 rounded accent-gray-900"
+                  />
+                  <span>每種贈品至少一個</span>
+                </label>
+                <span className="text-xs text-gray-400">
+                  避免只拿便宜贈品、最貴的那件反而掛零
                 </span>
               </div>
 
