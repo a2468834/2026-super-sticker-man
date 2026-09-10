@@ -8,6 +8,7 @@ import ProductSection from '@/components/ProductSection'
 import Cart from '@/components/Cart'
 import CartSummary from '@/components/CartSummary'
 import PasswordGate from '@/components/PasswordGate'
+import CartTools from '@/components/CartTools'
 
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([])
@@ -97,6 +98,26 @@ export default function Home() {
     })
   }
 
+  // Bulk entry from a pasted SKU string; merges into whatever is already there.
+  function addSkusToCart(items: CartItem[]) {
+    setCart((prev) => {
+      const next = prev.map((i) => ({ ...i }))
+      for (const item of items) {
+        const cap = maxQtyFor(item.categoryId, item.variantId)
+        const existing = next.find(
+          (i) => i.categoryId === item.categoryId && i.variantId === item.variantId,
+        )
+        if (existing) {
+          const merged = existing.qty + item.qty
+          existing.qty = cap != null ? Math.min(merged, cap) : merged
+        } else {
+          next.push({ ...item, qty: cap != null ? Math.min(item.qty, cap) : item.qty })
+        }
+      }
+      return next
+    })
+  }
+
   const totalItems = cart.reduce((s, i) => s + i.qty, 0)
 
   return (
@@ -153,6 +174,8 @@ export default function Home() {
             <span>我知道要拿排隊禮「銀色刺繡絲帶」</span>
           </label>
         </div>
+
+        <CartTools cart={cart} onAddSkus={addSkusToCart} />
 
         {/* Two-column layout */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
