@@ -159,12 +159,24 @@ function evaluate(atoms: Atom[], assign: number[], k: number): SplitPlan {
   return plan
 }
 
-// Lexicographic: gifts first, then money, then keeping categories together.
-export function isBetter(a: SplitPlan, b: SplitPlan | null): boolean {
-  if (!b) return true
-  if (a.giftCount !== b.giftCount) return a.giftCount > b.giftCount
-  if (a.totalCost !== b.totalCost) return a.totalCost < b.totalCost
-  return a.spread < b.spread
+/**
+ * How to break a tie once gift count and cost are equal.
+ *
+ * `group` keeps a category in one order — fewer trips carrying the same thing.
+ * `spread` deliberately scatters it, which is what you want for blind draws:
+ * buying a whole batch at once tends to pull duplicate designs, so splitting
+ * the purchase means splitting the draw.
+ */
+export type Cohesion = 'group' | 'spread'
+
+// Lexicographic: gifts first, then money, then the chosen cohesion direction.
+function makeComparator(cohesion: Cohesion) {
+  return (a: SplitPlan, b: SplitPlan | null): boolean => {
+    if (!b) return true
+    if (a.giftCount !== b.giftCount) return a.giftCount > b.giftCount
+    if (a.totalCost !== b.totalCost) return a.totalCost < b.totalCost
+    return cohesion === 'group' ? a.spread < b.spread : a.spread > b.spread
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -194,7 +206,12 @@ function randomSeed(atoms: Atom[], k: number, rand: () => number): number[] {
   return atoms.map(() => Math.floor(rand() * k))
 }
 
-function hillClimb(atoms: Atom[], start: number[], k: number): { assign: number[]; plan: SplitPlan } {
+function hillClimb(
+  atoms: Atom[],
+  start: number[],
+  k: number,
+  isBetter: (a: SplitPlan, b: SplitPlan | null) => boolean,
+): { assign: number[]; plan: SplitPlan } {
   let assign = start.slice()
   repair(atoms, assign, k)
   let plan = evaluate(atoms, assign, k)
@@ -291,12 +308,25 @@ function breathe(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0))
 }
 
+export type SplitOptions = {
+  maxOrders?: number
+  restarts?: number
+  cohesion?: Cohesion
+  onProgress?: (fraction: number) => void
+}
+
 export async function findBestSplit(
   cart: CartItem[],
-  maxOrdersOpt = DEFAULT_MAX_ORDERS,
-  restarts = 40,
-  onProgress?: (fraction: number) => void,
+  options: SplitOptions = {},
 ): Promise<SplitResult | null> {
+  const {
+    maxOrders: maxOrdersOpt = DEFAULT_MAX_ORDERS,
+    restarts = 40,
+    cohesion = 'group',
+    onProgress,
+  } = options
+  const isBetter = makeComparator(cohesion)
+
   const atoms = toAtoms(cart)
   if (atoms.length === 0) return null
 
@@ -319,7 +349,7 @@ export async function findBestSplit(
     for (let r = 0; r < restarts; r++) seeds.push(randomSeed(atoms, k, rand))
 
     for (const seed of seeds) {
-      const { plan } = hillClimb(atoms, seed, k)
+      const { plan } = hillClimb(atoms, seed, k, isBetter)
       if (isBetter(plan, bestForK)) bestForK = plan
 
       seedsDone += 1

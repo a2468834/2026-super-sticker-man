@@ -75,6 +75,7 @@ export default function CartTools({ cart, onAddSkus }: Props) {
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<SplitResult | null>(null)
   const [shownCount, setShownCount] = useState<number | null>(null)
+  const [groupSameCategory, setGroupSameCategory] = useState(true)
 
   async function handleSplit() {
     setBusy(true)
@@ -83,7 +84,10 @@ export default function CartTools({ cart, onAddSkus }: Props) {
     setShownCount(null)
     // Let the spinner paint before the search seizes the thread.
     await new Promise((r) => setTimeout(r, 0))
-    const found = await findBestSplit(cart, 6, 40, setProgress)
+    const found = await findBestSplit(cart, {
+      cohesion: groupSameCategory ? 'group' : 'spread',
+      onProgress: setProgress,
+    })
     setResult(found)
     setShownCount(found?.best.orders.length ?? null)
     setBusy(false)
@@ -134,6 +138,24 @@ export default function CartTools({ cart, onAddSkus }: Props) {
                   )}
                   {busy ? `試算中 ${Math.round(progress * 100)}%` : '試算拆單'}
                 </button>
+
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={groupSameCategory}
+                    onChange={(e) => {
+                      setGroupSameCategory(e.target.checked)
+                      // The shown plan was optimised for the old setting.
+                      setResult(null)
+                      setShownCount(null)
+                    }}
+                    className="h-4 w-4 rounded accent-gray-900"
+                  />
+                  <span>同類品項盡量集中在同一筆訂單</span>
+                </label>
+                <span className="text-xs text-gray-400">
+                  取消勾選則盡量分散，盲抽可分批開獎
+                </span>
               </div>
 
               {result && shownPlan && (
